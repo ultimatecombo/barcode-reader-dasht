@@ -2,12 +2,18 @@ const remote = require("electron").remote;
 const { BrowserWindow } = require("electron").remote;
 
 const currWin = remote.getCurrentWindow(),
+  storage = window.localStorage,
   devtoolsBtn = document.getElementById("devtoolsBtn"),
   settingsBtn = document.getElementById("settingsBtn"),
   minimizeBtn = document.getElementById("minimizeBtn"),
   closeBtn = document.getElementById("closeBtn");
 
-let settingsWin = null;
+initSettings();
+let settings = loadSettings();
+
+currWin.title = document.getElementById(
+  "titlebar__title"
+).innerHTML = `استعلام قیمت - ${settings.storeName}`;
 
 // open browser dev tools
 devtoolsBtn.addEventListener("click", () => {
@@ -18,7 +24,7 @@ devtoolsBtn.addEventListener("click", () => {
 
 // create settings window
 settingsBtn.addEventListener("click", () => {
-  settingsWin = new BrowserWindow({
+  let settingsWin = new BrowserWindow({
     width: 500,
     height: 630,
     frame: false,
@@ -46,3 +52,23 @@ closeBtn.addEventListener("click", () => {
 
 // minimize app window
 minimizeBtn.addEventListener("click", () => currWin.minimize());
+
+function initSettings() {
+  if (!storage.getItem("settings")) {
+    storage.setItem(
+      "settings",
+      JSON.stringify({
+        usbDevName: "",
+        usbDevVendorID: "",
+        usbDevProductID: "",
+        databaseName: "",
+        storeName: "",
+        columns: [],
+      })
+    );
+  }
+}
+
+function loadSettings() {
+  return JSON.parse(storage.getItem("settings"));
+}
