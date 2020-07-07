@@ -1,0 +1,87 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="stylesheet"
+      href="../node_modules/materialize-css/dist/css/materialize.min.css"
+    />
+    <link rel="stylesheet" href="../assets/css/materialize-rtl.min.css" />
+    <link rel="stylesheet" href="../assets/css/all.css" />
+    <link rel="stylesheet" href="../assets/css/app.css" />
+    <link rel="stylesheet" href="../assets/css/setting.css" />
+    <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="script-src 'self' 'unsafe-inline';"
+    />
+    <title>Document</title>
+  </head>
+
+  <body class="rtl">
+    <div class="wrapper">
+      <div class="titlebar">
+        <div class="titlebar__title">
+          <h6>تنظیمات</h6>
+        </div>
+        <div class="titlebar__controls">
+          <!-- exit button -->
+          <button id="closeBtn" class="btn-flat waves-effect waves-teal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      <div class="main">
+        <div class="row">
+          <!-- Store Name -->
+          <div class="col s12">
+            <div class="input-field col s12">
+              <input id="storeName" type="text" />
+              <label for="storeName">نام فروشگاه</label>
+            </div>
+          </div>
+
+          <!-- usb barcode reader -->
+          <div class="input-field col s12">
+            <select id="usbDevice">
+              <option value="" disabled selected
+                >بارکدخوان را انتخاب کنید</option
+              >
+            </select>
+            <label>بارکدخوان</label>
+          </div>
+
+          <!-- database -->
+          <div class="input-field col s12">
+            <select id="database">
+              <option value="" disabled selected>دیتابیس را انتخاب کنید</option>
+            </select>
+            <label>دیتابیس</label>
+          </div>
+
+          <!-- item columns-->
+          <div class="input-field col s12">
+            <select id="columns" multiple>
+              <option value="" disabled selected
+                >مشخصات کالا را انتخاب کنید</option
+              >
+            </select>
+            <label>مشخصات کالا</label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col s12">
+            <button
+              id="saveBtn"
+              class="btn waves-effect waves-light light-green"
+            >
+              ذخیره
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script src="../src/setting.js"></script>
+</html>

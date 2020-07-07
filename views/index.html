@@ -1,0 +1,100 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+    <link rel="stylesheet" href="../node_modules/materialize-css/dist/css/materialize.min.css">
+    <link rel="stylesheet" href="../assets/css/materialize-rtl.min.css">
+    <link rel="stylesheet" href="../assets/css/all.css">
+    <link rel="stylesheet" href="../assets/css/app.css">
+    <link rel="stylesheet" href="../assets/css/index.css">
+    <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+</head>
+
+<body class="rtl">
+    <div class="wrapper">
+        <!-- titlebar -->
+        <div class="titlebar">
+            <div class="titlebar__title">
+                <h6>بارکدخوان</h6>
+            </div>
+            <div class="titlebar__controls">
+                <!-- devtools button -->
+                <button id="devtoolsBtn" class="btn-flat waves-effect waves-teal">
+                    <i class="fas fa-bug"></i>
+                </button>
+
+                <!-- settings button -->
+                <button id="settingsBtn" class="btn-flat waves-effect waves-teal">
+                    <i class="fas fa-cog"></i>
+                </button>
+
+                <!-- minimize button -->
+                <button id="minimizeBtn" class="btn-flat waves-effect waves-teal">
+                    <i class="fas fa-minus"></i>
+                </button>
+
+                <!-- exit button -->
+                <button id="closeBtn" class="btn-flat waves-effect waves-teal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- main -->
+        <div class="main">
+            <!-- searchbox -->
+            <div class="searchbox row">
+                <div class="searchbox__input input-field col s12">
+                    <i class="fas fa-search prefix"></i>
+                    <input type="text" id="searchbox" name="searchbox">
+                    <label for="searchbox">بارکد یا نام کالا را وارد کنید...</label>
+                </div>
+            </div>
+
+            <!-- item information -->
+            <div class="item-details">
+                <div class="row">
+                    <div class="input-field col s12">
+                        <div class="item-details__title">مشخصات کالا</div>
+                    </div>
+                    <div class="input-field col s12">
+                        <label for="itemName">نام</label>
+                        <input type="text" name="itemName" id="itemName" readonly>
+                    </div>
+                    <div class="input-field col s12">
+                        <label for="itemBarcode">بارکد</label>
+                        <input type="text" name="itemBarcode" id="itemBarcode" readonly>
+                    </div>
+                    <div class="input-field col s12">
+                        <label for="itemPrice">قیمت</label>
+                        <input type="text" name="itemPrice" id="itemPrice" readonly>
+                    </div>
+                    <div class="input-field col s12">
+                        <textarea class="materialize-textarea" id="itemDesc" rows="5" readonly></textarea>
+                        <label for="itemDesc">توضیحات</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- statusbar -->
+        <div class="statusbar">
+            <div class="statusbar__icons">
+                <i class="fas fa-plug disconnected"></i>
+                <i class="fas fa-database connected"></i>
+            </div>
+            <div class="statusbar__msg">
+                در حال اتصال...
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    require('materialize-css');
+</script>
+<script src="../src/index.js"></script>
+
+</html>
