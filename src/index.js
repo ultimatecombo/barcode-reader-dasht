@@ -15,6 +15,9 @@ currWin.title = document.getElementById(
   "titlebar__title"
 ).innerHTML = `استعلام قیمت - ${settings.storeName}`;
 
+// main window is maximized by default
+currWin.maximize();
+
 // open browser dev tools
 devtoolsBtn.addEventListener("click", () => {
   if (currWin.webContents.isDevToolsOpened())
