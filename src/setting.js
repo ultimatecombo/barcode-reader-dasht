@@ -15,7 +15,6 @@ const ipcRenderer = require("electron").ipcRenderer,
 
 currWin.webContents.openDevTools();
 
-initLocalStorage();
 initSettings();
 
 // save user settings in locale storage
@@ -82,22 +81,6 @@ function fetchDatabases() {
     ipcRenderer.send("get-database-list");
     ipcRenderer.on("database-list", (event, args) => resolve(args));
   });
-}
-
-function initLocalStorage() {
-  if (!storage.getItem("settings")) {
-    storage.setItem(
-      "settings",
-      JSON.stringify({
-        usbDevName: "",
-        usbDevVendorID: "",
-        usbDevProductID: "",
-        databaseName: "",
-        storeName: "",
-        columns: [],
-      })
-    );
-  }
 }
 
 function initSettings() {
