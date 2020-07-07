@@ -23,52 +23,6 @@ saveBtn.addEventListener("click", () => saveSettings());
 // close setting window
 closeBtn.addEventListener("click", () => currWin.close());
 
-// ask main process for usb devices list
-// // ipcRenderer.send("get-usb-list");
-// // ipcRenderer.on("usb-list", (event, args) => {
-// //   console.log(args);
-// //   try {
-// //     // remove redundent elements
-// //     let ids = [...new Set(args.map((d) => d.productId))];
-// //     let currDeviceId = JSON.parse(storage.getItem("settings")).usbDevProductID;
-// //     usbDevices = args.slice();
-
-// //     ids.forEach((id) => {
-// //       let device = args.find((d) => d.productId === id);
-// //       let opt = document.createElement("option");
-// //       opt.value = id;
-// //       opt.innerHTML = `${device.product}-${id}`;
-// //       if (id == currDeviceId) opt.selected = true;
-// //       usbElm.appendChild(opt);
-// //     });
-// //     mcss.FormSelect.init(document.querySelectorAll("select"));
-// //   } catch (error) {
-// //     usbDevices = [];
-// //     console.log(error);
-// //   }
-// // });
-
-// ask main process for database list
-// // ipcRenderer.send("get-database-list");
-// // ipcRenderer.on("database-list", (event, args) => {
-// //   console.log(args);
-// //   try {
-// //     let list = args.recordset;
-// //     databases = list.slice();
-// //     list.forEach((db) => {
-// //       let opt = document.createElement("option");
-// //       let currOpt = JSON.parse(storage.getItem("settings")).databaseName;
-// //       opt.value = db.name;
-// //       opt.innerHTML = db.name;
-// //       if (db.name == currOpt) opt.selected = true;
-// //       dbElm.appendChild(opt);
-// //     });
-// //     mcss.FormSelect.init(document.querySelectorAll("select"));
-// //   } catch (error) {
-// //     console.log(error);
-// //   }
-// // });
-
 function fetchUsbDevices() {
   return new Promise((resolve, reject) => {
     ipcRenderer.send("get-usb-list");
@@ -153,6 +107,7 @@ function saveSettings() {
   // get selected barcode reader
   selects = mcss.FormSelect.getInstance(usbElm).dropdownOptions;
   let br = [...selects.children].filter((n) => n.className === "selected")[0];
+  //! chcek for null value
   br = usbDevices.find(
     (d) => `<span>${d.product}-${d.productId}</span>` === br.innerHTML
   );
@@ -160,7 +115,8 @@ function saveSettings() {
   // get selected barcode reader
   selects = mcss.FormSelect.getInstance(dbElm).dropdownOptions;
   let db = [...selects.children].filter((n) => n.className === "selected")[0];
-  db = databases.find((item) => `<span>${item.name}</span>` === db.innerHTML);
+  //! chcek for null value
+  db = databases.find((item) => `<span>${item.name}</span>` === db.innerHTML);  
 
   storage.setItem(
     "settings",
