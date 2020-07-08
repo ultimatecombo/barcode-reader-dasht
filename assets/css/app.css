@@ -5,7 +5,7 @@
 
 :root {
   --font-family: yekan;
-  --font-size-samll: 20px;
+  --font-size-small: 22px;
   --font-size-medium: 25px;
   --font-size-large: 30px;
   --color-one: #f5f5f5;
@@ -20,7 +20,7 @@ body {
   direction: rtl;
   text-align: right;
   overflow: hidden;
-  font-size: var(--font-size-samll);
+  font-size: var(--font-size-small);
   font-family: var(--font-family);
   user-select: none;
 }
