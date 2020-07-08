@@ -77,6 +77,7 @@ closeBtn.addEventListener("click", () => {
 // minimize app window
 minimizeBtn.addEventListener("click", () => currWin.minimize());
 
+// initialize settings field in local storage
 function initSettings() {
   if (!storage.getItem("settings")) {
     storage.setItem(
@@ -93,10 +94,12 @@ function initSettings() {
   }
 }
 
+// load user settings
 function loadSettings() {
   return JSON.parse(storage.getItem("settings"));
 }
 
+// seperate item price with comma
 function seperateWith(price, seperator = ",") {
   let chars = price.split(""),
     count = 0;
@@ -111,6 +114,7 @@ function seperateWith(price, seperator = ",") {
   return chars.join("");
 }
 
+// search database for seach string
 function queryItem(value = "") {
   if (value) {
     let item = `%${value.trim().replace(" ", "%")}%`
@@ -118,6 +122,7 @@ function queryItem(value = "") {
   } else clearCurrentInfo();
 }
 
+// show item query result
 function showQueryResult(item) {
   // show item name, barcode, desc and price
   itemNameElm.value = item.ItemName;
@@ -127,6 +132,7 @@ function showQueryResult(item) {
   mcss.updateTextFields();
 }
 
+// clear current item information
 function clearCurrentInfo() {
   itemNameElm.value = "";
   itemBarcodeElm.value = "";
