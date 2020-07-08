@@ -11,6 +11,10 @@ const currWin = remote.getCurrentWindow(),
 initSettings();
 let settings = loadSettings();
 
+document.getElementById("item-price__value").innerHTML = seperateWith(
+  "150000000"
+);
+
 currWin.title = document.getElementById(
   "titlebar__title"
 ).innerHTML = `استعلام قیمت - ${settings.storeName}`;
@@ -74,4 +78,18 @@ function initSettings() {
 
 function loadSettings() {
   return JSON.parse(storage.getItem("settings"));
+}
+
+function seperateWith(price, seperator = ",") {
+  let chars = price.split(""),
+    count = 0;
+
+  for (let i = chars.length - 1; i > -1; i--) {
+    if (count === 2 && chars[i - 1] != undefined) {
+      chars.splice(i, 0, seperator);
+      count = 0;
+    } else count++;
+  }
+
+  return chars.join("");
 }
