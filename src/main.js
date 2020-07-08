@@ -49,7 +49,7 @@ ipcMain.on("db-query-item", (event, args) => {
         CASE WHEN Price1-DefaultPrice >0 THEN Price1-DefaultPrice ELSE 0 END Dicount
         FROM POS.vwItemSalePrice
         WHERE ItemSubUnitRef IS NULL AND 
-        (ItemBarCode LIKE '%${args}%' OR itemIranCode LIKE '%${args}%' OR ItemTitle LIKE '%${args}%') `,
+        (ItemBarCode LIKE '${args}' OR itemIranCode LIKE '${args}' OR ItemTitle LIKE '${args}') `,
         (err, result) => {
           if (err) console.log(err);
           else event.sender.send("db-query-result", result);

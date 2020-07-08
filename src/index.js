@@ -5,7 +5,6 @@ const { BrowserWindow } = require("electron").remote;
 
 const currWin = remote.getCurrentWindow(),
   storage = window.localStorage,
-  webFrame = require('electron').webFrame,
   mcss = require("materialize-css"),
   searchbox = document.getElementById("searchbox"),
   devtoolsBtn = document.getElementById("devtoolsBtn"),
@@ -113,10 +112,10 @@ function seperateWith(price, seperator = ",") {
 }
 
 function queryItem(value = "") {
-  value = value.trim();
-  console.log(value);
-  if (value) ipcRenderer.send("db-query-item", value);
-  else clearCurrentInfo();
+  if (value) {
+    let item = `%${value.trim().replace(" ", "%")}%`
+    ipcRenderer.send("db-query-item", item);
+  } else clearCurrentInfo();
 }
 
 function showQueryResult(item) {
@@ -124,14 +123,14 @@ function showQueryResult(item) {
   itemNameElm.value = item.ItemName;
   itemBarcodeElm.value = item.ItemBarCode;
   itemDescElm.value = item.ItemTitle;
-  itemPriceElm.innerHTML = seperateWith(`${item.Price1}`);  
+  itemPriceElm.innerHTML = seperateWith(`${item.Price1}`);
   mcss.updateTextFields();
 }
 
-function clearCurrentInfo(){
+function clearCurrentInfo() {
   itemNameElm.value = "";
   itemBarcodeElm.value = "";
   itemDescElm.value = "";
-  itemPriceElm.innerHTML = "";  
+  itemPriceElm.innerHTML = "";
   mcss.updateTextFields();
 }
