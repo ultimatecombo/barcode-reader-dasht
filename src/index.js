@@ -46,6 +46,12 @@ searchbox.addEventListener(
   _.debounce(() => queryItem(searchbox.value), 1200)
 );
 
+// always keep the focus on searchbox
+searchbox.focus();
+searchbox.addEventListener('blur', ()=>{
+  searchbox.focus();
+});
+
 // create settings window
 settingsBtn.addEventListener("click", () => {
   let settingsWin = new BrowserWindow({
@@ -130,6 +136,7 @@ function showQueryResult(item) {
   itemDescElm.value = item.ItemTitle;
   itemPriceElm.innerHTML = seperateWith(`${item.Price1}`);
   mcss.updateTextFields();
+  mcss.textareaAutoResize(itemDescElm);
 }
 
 // clear current item information
