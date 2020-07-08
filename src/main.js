@@ -52,11 +52,11 @@ ipcMain.on("get-database-list", (event, args) => {
   
 });
 
-ipcMain.on("start-scan", (event, args) => {
+ipcMain.on("start-barcode-scan", (event, args) => {
   startScan(args.vendorId, args.productId);
 });
 
-ipcMain.on("stop-scan", () => {
+ipcMain.on("stop-barcode-scan", () => {
   stopScan();
 });
 
