@@ -1,19 +1,24 @@
+const _ = require("lodash");
 const remote = require("electron").remote;
+const { ipcRenderer } = require("electron");
 const { BrowserWindow } = require("electron").remote;
 
 const currWin = remote.getCurrentWindow(),
   storage = window.localStorage,
+  webFrame = require('electron').webFrame,
+  mcss = require("materialize-css"),
+  searchbox = document.getElementById("searchbox"),
   devtoolsBtn = document.getElementById("devtoolsBtn"),
+  itemNameElm = document.getElementById("itemName"),
+  itemBarcodeElm = document.getElementById("itemBarcode"),
+  itemDescElm = document.getElementById("itemDesc"),
+  itemPriceElm = document.getElementById("itemPrice"),
   settingsBtn = document.getElementById("settingsBtn"),
   minimizeBtn = document.getElementById("minimizeBtn"),
   closeBtn = document.getElementById("closeBtn");
 
 initSettings();
 let settings = loadSettings();
-
-document.getElementById("item-price__value").innerHTML = seperateWith(
-  "150000000"
-);
 
 currWin.title = document.getElementById(
   "titlebar__title"
@@ -22,12 +27,25 @@ currWin.title = document.getElementById(
 // main window is maximized by default
 currWin.maximize();
 
+ipcRenderer.send("db-create-connection", "Dasht01");
+
+ipcRenderer.on("db-query-result", (event, args) => {
+  console.log(args);
+  if (args.recordset.length > 0) showQueryResult(args.recordset[0]);
+  else clearCurrentInfo();
+});
+
 // open browser dev tools
 devtoolsBtn.addEventListener("click", () => {
   if (currWin.webContents.isDevToolsOpened())
     currWin.webContents.closeDevTools();
   else currWin.webContents.openDevTools();
 });
+
+searchbox.addEventListener(
+  "keydown",
+  _.debounce(() => queryItem(searchbox.value), 1200)
+);
 
 // create settings window
 settingsBtn.addEventListener("click", () => {
@@ -92,4 +110,28 @@ function seperateWith(price, seperator = ",") {
   }
 
   return chars.join("");
+}
+
+function queryItem(value = "") {
+  value = value.trim();
+  console.log(value);
+  if (value) ipcRenderer.send("db-query-item", value);
+  else clearCurrentInfo();
+}
+
+function showQueryResult(item) {
+  // show item name, barcode, desc and price
+  itemNameElm.value = item.ItemName;
+  itemBarcodeElm.value = item.ItemBarCode;
+  itemDescElm.value = item.ItemTitle;
+  itemPriceElm.innerHTML = seperateWith(`${item.Price1}`);  
+  mcss.updateTextFields();
+}
+
+function clearCurrentInfo(){
+  itemNameElm.value = "";
+  itemBarcodeElm.value = "";
+  itemDescElm.value = "";
+  itemPriceElm.innerHTML = "";  
+  mcss.updateTextFields();
 }
