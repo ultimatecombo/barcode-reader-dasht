@@ -1,3 +1,8 @@
+html,
+body {
+  font-size: var(--font-size-small);
+}
+
 .wrapper {
     grid-template-rows: 50px calc(100% - 50px);
 }
