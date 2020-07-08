@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "electron": "^9.0.5",
+    "lodash": "^4.17.15",
     "materialize-css": "^1.0.0-rc.2",
     "msnodesqlv8": "^1.1.7",
     "mssql": "^6.2.0",
