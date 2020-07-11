@@ -41,8 +41,8 @@ function initSettings() {
   try {
     let settings = JSON.parse(storage.getItem("settings")),
       columnOptions = {
-        barcode: "بارکد",
-        desc: "توضیحات",
+        itemBarcode: "بارکد",
+        itemDesc: "توضیحات",
       };
 
     // set store name

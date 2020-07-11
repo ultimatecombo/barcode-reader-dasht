@@ -28,25 +28,25 @@ ipcRenderer.on("db-query-result", (event, args) => {
 });
 
 ipcRenderer.on("db-test-result", (event, result) => {
-  console.log(`database: ${result}`)
+  console.log(`database: ${result}`);
   if (result) {
     databaseStat.classList.replace("disconnected", "connected");
     statusMsgElm.innerHTML = "";
   } else {
     databaseStat.classList.replace("connected", "disconnected");
-    statusMsgElm.innerHTML = 'خطا در اتصال به داده';
+    statusMsgElm.innerHTML = "خطا در اتصال به داده";
   }
 });
 
 ipcRenderer.on("scanner-create-result", (event, result) => {
-  console.log(`scanner: ${result}`)
+  console.log(`scanner: ${result}`);
   if (result) {
     ipcRenderer.send("scanner-start");
     scannerStat.classList.replace("disconnected", "connected");
     statusMsgElm.innerHTML = "";
   } else {
     scannerStat.classList.replace("connected", "disconnected");
-    statusMsgElm.innerHTML = 'خطا در اتصال به بارکدخوان';
+    statusMsgElm.innerHTML = "خطا در اتصال به بارکدخوان";
   }
 });
 
@@ -145,7 +145,15 @@ function loadSettings() {
     ipcRenderer.send("scanner-create", {
       vendorId: userSettings.usbDevVendorID,
       productId: userSettings.usbDevProductID,
-    });    
+    });
+  }
+
+  if (userSettings.columns) {
+    ["itemBarcode", "itemDesc"].forEach((col) => {
+      let elm = document.getElementById(col).parentElement;
+      if (userSettings.columns.includes(col)) elm.style.display = "block";
+      else elm.style.display = "none";
+    });
   }
 }
 
