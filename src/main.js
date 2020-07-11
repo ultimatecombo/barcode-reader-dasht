@@ -3,11 +3,12 @@ const sql = require("mssql/msnodesqlv8");
 const { app, ipcMain, BrowserWindow } = require("electron");
 const { UsbScanner, getDevices } = require("usb-barcode-scanner");
 
-let scanner = null;
-let connectionPool = null;
+let mainWindow = null,
+  scanner = null,
+  connectionPool = null;
 
 function createWindow() {
-  let win = new BrowserWindow({
+  let mainWindow = new BrowserWindow({
     width: 700,
     height: 900,
     minWidth: 700,
@@ -18,7 +19,7 @@ function createWindow() {
     },
   });
 
-  win.loadFile("./views/index.html");  
+  mainWindow.loadFile("./views/index.html");
 }
 
 app.on("window-all-closed", app.quit);
@@ -117,6 +118,12 @@ ipcMain.on("db-create-connection", (event, dbName) => {
 
     connectionPool = createConnectionPool(config);
   }
+});
+
+// get error reports and send them to main window
+// to display to user
+ipcMain.on("error-report", (event, error) => {
+  mainWindow.webContents.send("error-show", error);
 });
 
 function startScan(vendorId, productId) {
