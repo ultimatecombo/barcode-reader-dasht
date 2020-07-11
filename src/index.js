@@ -76,6 +76,9 @@ function initWindow() {
     _.debounce(() => queryItem(searchbox.value), 1200)
   );
 
+  // init help tooltips
+  mcss.Tooltip.init(document.querySelectorAll(".tooltipped"));
+
   // init window buttons
   devtoolsBtn.addEventListener("click", () => {
     if (currWin.webContents.isDevToolsOpened())

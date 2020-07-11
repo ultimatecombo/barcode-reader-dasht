@@ -105,7 +105,7 @@ textarea {
 
 .statusbar__icons {
   display: flex;
-  align-items: center;  
+  align-items: center;
   margin-right: auto;
 }
 
@@ -133,6 +133,10 @@ textarea {
 .statusbar__msg {
   color: var(--titlebar-text-color);
   font-size: 0.65rem;
+}
+
+.material-tooltip {
+  font-size: 0.5rem;
 }
 
 #toast-container {

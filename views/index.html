@@ -25,27 +25,52 @@
         </div>
         <div class="titlebar__controls">
           <!-- devtools button -->
-          <button id="devtoolsBtn" class="btn-flat waves-effect waves-teal">
+          <button
+            id="devtoolsBtn"
+            class="btn-flat waves-effect waves-teal tooltipped"
+            data-position="bottom"
+            data-tooltip="dev tools"
+          >
             <i class="fas fa-bug"></i>
           </button>
 
           <!-- settings button -->
-          <button id="settingsBtn" class="btn-flat waves-effect waves-teal">
+          <button
+            id="settingsBtn"
+            class="btn-flat waves-effect waves-teal tooltipped"
+            data-position="bottom"
+            data-tooltip="تنظیمات"
+          >
             <i class="fas fa-cog"></i>
           </button>
 
           <!-- minimize button -->
-          <button id="minimizeBtn" class="btn-flat waves-effect waves-teal">
+          <button
+            id="minimizeBtn"
+            class="btn-flat waves-effect waves-teal tooltipped"
+            data-position="bottom"
+            data-tooltip="مخفی کن"
+          >
             <i class="fas fa-minus"></i>
           </button>
 
           <!-- maximize button -->
-          <button id="maximizeBtn" class="btn-flat waves-effect waves-teal">
+          <button
+            id="maximizeBtn"
+            class="btn-flat waves-effect waves-teal tooltipped"
+            data-position="bottom"
+            data-tooltip="تمام صفحه"
+          >
             <i class="fas fa-expand"></i>
           </button>
 
           <!-- exit button -->
-          <button id="closeBtn" class="btn-flat waves-effect waves-teal">
+          <button
+            id="closeBtn"
+            class="btn-flat waves-effect waves-teal tooltipped"
+            data-position="bottom"
+            data-tooltip="خروج"
+          >
             <i class="fas fa-times"></i>
           </button>
         </div>
@@ -116,8 +141,18 @@
       <div class="statusbar">
         <div id="statusMsg" class="statusbar__msg"></div>
         <div class="statusbar__icons">
-          <i id="scannerStatus" class="fas fa-cash-register disconnected"></i>
-          <i id="databaseStatus" class="fas fa-database disconnected"></i>
+          <i
+            id="scannerStatus"
+            class="fas fa-cash-register tooltipped disconnected"
+            data-position="top"
+            data-tooltip="اتصال بارکدخوان"
+          ></i>
+          <i
+            id="databaseStatus"
+            class="fas fa-database tooltipped disconnected"
+            data-position="top"
+            data-tooltip="اتصال پایگاه داده"
+          ></i>
         </div>
       </div>
     </div>
