@@ -72,8 +72,8 @@ function initSettings() {
     });
   });
 
-  // fetch usb devices, fill selectbox 
-  let p2 = fetchUsbDevices().then((data) => {    
+  // fetch usb devices, fill selectbox
+  let p2 = fetchUsbDevices().then((data) => {
     console.log(data);
     // remove redundent elements
     let ids = [...new Set(data.map((d) => d.productId))];
@@ -89,7 +89,7 @@ function initSettings() {
       usbElm.appendChild(opt);
     });
   });
-  
+
   Promise.all([p1, p2])
     .then(() => {
       // stop loading screen
@@ -107,16 +107,18 @@ function saveSettings() {
   // get selected barcode reader
   selects = mcss.FormSelect.getInstance(usbElm).dropdownOptions;
   let br = [...selects.children].filter((n) => n.className === "selected")[0];
-  //! chcek for null value
-  br = usbDevices.find(
-    (d) => `<span>${d.product}-${d.productId}</span>` === br.innerHTML
-  );
+  if (br) {
+    br = usbDevices.find(
+      (d) => `<span>${d.product}-${d.productId}</span>` === br.innerHTML
+    );
+  }
 
   // get selected barcode reader
   selects = mcss.FormSelect.getInstance(dbElm).dropdownOptions;
   let db = [...selects.children].filter((n) => n.className === "selected")[0];
-  //! chcek for null value
-  db = databases.find((item) => `<span>${item.name}</span>` === db.innerHTML);  
+  if (db) {
+    db = databases.find((item) => `<span>${item.name}</span>` === db.innerHTML);
+  }
 
   storage.setItem(
     "settings",
