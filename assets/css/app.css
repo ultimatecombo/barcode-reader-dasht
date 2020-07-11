@@ -5,6 +5,7 @@
 
 :root {
   --font-family: yekan;
+  --font-size-xsmall: 17px;
   --font-size-small: 22px;
   --font-size-medium: 25px;
   --font-size-large: 28px;
@@ -109,7 +110,15 @@ textarea {
 
 .statusbar__icons i {
   padding: 0px 5px;
-  font-size: 1rem;
+  font-size: 0.7rem;
+}
+
+.statusbar__icons i.connected {
+  color: greenyellow;
+}
+
+.statusbar__icons i.disconnected {
+  color: red;
 }
 
 .statusbar__icons i.connected {
@@ -123,7 +132,22 @@ textarea {
 .statusbar__msg {
   color: var(--titlebar-text-color);
   margin-right: auto;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
+}
+
+#toast-container {
+  direction: ltr;
+  font-family: serif;
+  top: auto !important;
+  left: 50% !important;
+  bottom: 50px !important;
+  transform: translateX(-50%);
+}
+
+.toast span,
+.toast .btn,
+.toast .btn-flat {
+  font-size: var(--font-size-xsmall);
 }
 
 /*---- scrollbar ----*/
