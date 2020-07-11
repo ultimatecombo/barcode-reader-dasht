@@ -16,17 +16,7 @@ const currWin = remote.getCurrentWindow(),
   minimizeBtn = document.getElementById("minimizeBtn"),
   closeBtn = document.getElementById("closeBtn");
 
-initSettings();
-let settings = loadSettings();
-
-currWin.title = document.getElementById(
-  "titlebar__title"
-).innerHTML = `استعلام قیمت - ${settings.storeName}`;
-
-// main window is maximized by default
-currWin.maximize();
-
-ipcRenderer.send("db-create-connection", "Dasht01");
+initWindow();
 
 ipcRenderer.on("db-query-result", (event, args) => {
   console.log(args);
@@ -34,57 +24,84 @@ ipcRenderer.on("db-query-result", (event, args) => {
   else clearCurrentInfo();
 });
 
-// open browser dev tools
-devtoolsBtn.addEventListener("click", () => {
-  if (currWin.webContents.isDevToolsOpened())
-    currWin.webContents.closeDevTools();
-  else currWin.webContents.openDevTools();
+ipcRenderer.on("db-test-result", (event, result) => {
+  console.log(`database: ${result}`)
+  if (result) {
+
+  } else {
+
+  }
 });
 
-searchbox.addEventListener(
-  "keydown",
-  _.debounce(() => queryItem(searchbox.value), 1200)
-);
+ipcRenderer.on("scanner-create-result", (event, result) => {
+  console.log(`scanner: ${result}`)
+  if (result) {
+    ipcRenderer.send("scanner-start");
+  } else {
 
-// always keep the focus on searchbox
-searchbox.focus();
-searchbox.addEventListener('blur', ()=>{
+  }
+});
+
+ipcRenderer.on("apply-settings", (event, args) => loadSettings());
+
+ipcRenderer.on("error-show", (event, error) => {
+  console.log(error);
+  // show error message for 10 min
+  showToastMessage(error, 600000);
+});
+
+function initWindow() {
+  initLocalStorage();
+  loadSettings();
+
+  // main window is maximized by default
+  currWin.maximize();
+
+  // always keep the focus on searchbox
   searchbox.focus();
-});
-
-// create settings window
-settingsBtn.addEventListener("click", () => {
-  let settingsWin = new BrowserWindow({
-    width: 500,
-    height: 630,
-    frame: false,
-    parent: currWin,
-    resizable: false,
-    webPreferences: {
-      nodeIntegration: true,
-    },
+  searchbox.addEventListener("blur", () => {
+    searchbox.focus();
   });
+  searchbox.addEventListener(
+    "keydown",
+    _.debounce(() => queryItem(searchbox.value), 1200)
+  );
 
-  settingsWin.on("close", () => {
-    settingsWin = null;
-    currWin.focus();
+  // init window buttons
+  devtoolsBtn.addEventListener("click", () => {
+    if (currWin.webContents.isDevToolsOpened())
+      currWin.webContents.closeDevTools();
+    else currWin.webContents.openDevTools();
   });
-  settingsWin.on("ready-to-show", () => settingsWin.show());
-  settingsWin.loadFile("./views/setting.html");
-});
+  settingsBtn.addEventListener("click", () => {
+    let settingsWin = new BrowserWindow({
+      width: 500,
+      height: 630,
+      frame: false,
+      parent: currWin,
+      resizable: false,
+      webPreferences: {
+        nodeIntegration: true,
+      },
+    });
 
-// close the main window and quit the app
-closeBtn.addEventListener("click", () => {
-  let childs = currWin.getChildWindows();
-  childs.forEach((c) => c.close());
-  currWin.close();
-});
-
-// minimize app window
-minimizeBtn.addEventListener("click", () => currWin.minimize());
+    settingsWin.on("close", () => {
+      settingsWin = null;
+      currWin.focus();
+    });
+    settingsWin.on("ready-to-show", () => settingsWin.show());
+    settingsWin.loadFile("./views/setting.html");
+  });
+  closeBtn.addEventListener("click", () => {
+    let childs = currWin.getChildWindows();
+    childs.forEach((c) => c.close());
+    currWin.close();
+  });
+  minimizeBtn.addEventListener("click", () => currWin.minimize());
+}
 
 // initialize settings field in local storage
-function initSettings() {
+function initLocalStorage() {
   if (!storage.getItem("settings")) {
     storage.setItem(
       "settings",
@@ -102,7 +119,26 @@ function initSettings() {
 
 // load user settings
 function loadSettings() {
-  return JSON.parse(storage.getItem("settings"));
+  let userSettings = JSON.parse(storage.getItem("settings"));
+
+  // show store name in title
+  currWin.title = document.getElementById(
+    "titlebar__title"
+  ).innerHTML = `استعلام قیمت${
+    userSettings.storeName ? " - " + userSettings.storeName : ""
+  }`;
+
+  if (userSettings.databaseName) {
+    ipcRenderer.send("db-create-connection", userSettings.databaseName);
+    ipcRenderer.send("db-connection-test");
+  }
+
+  if (userSettings.usbDevName) {
+    ipcRenderer.send("scanner-create", {
+      vendorId: userSettings.usbDevVendorID,
+      productId: userSettings.usbDevProductID,
+    });    
+  }
 }
 
 // seperate item price with comma
@@ -123,7 +159,7 @@ function seperateWith(price, seperator = ",") {
 // search database for seach string
 function queryItem(value = "") {
   if (value) {
-    let item = `%${value.trim().replace(" ", "%")}%`
+    let item = `%${value.trim().replace(" ", "%")}%`;
     ipcRenderer.send("db-query-item", item);
   } else clearCurrentInfo();
 }
@@ -146,4 +182,23 @@ function clearCurrentInfo() {
   itemDescElm.value = "";
   itemPriceElm.innerHTML = "";
   mcss.updateTextFields();
+}
+
+function showToastMessage(msg, delay = 400) {
+  let id = `class-${getUID()}`;
+  mcss.toast({
+    html: `<span>${msg}</span><button onclick="dismissToast('${id}')" class="btn-flat toast-action">Dismiss</button>`,
+    classes: id,
+    displayLength: delay,
+  });
+}
+
+function dismissToast(id) {
+  let toastElm = document.getElementsByClassName(id)[0];
+  var toastInstance = M.Toast.getInstance(toastElm);
+  toastInstance.dismiss();
+}
+
+function getUID() {
+  return Math.floor(Math.random() * 1000000000).toString(16);
 }
