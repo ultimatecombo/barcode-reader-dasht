@@ -38,99 +38,109 @@ function fetchDatabases() {
 }
 
 function initSettings() {
-  let settings = JSON.parse(storage.getItem("settings")),
-    columnOptions = {
-      barcode: "بارکد",
-      desc: "توضیحات",
-    };
+  try {
+    let settings = JSON.parse(storage.getItem("settings")),
+      columnOptions = {
+        barcode: "بارکد",
+        desc: "توضیحات",
+      };
 
-  // set store name
-  storeElm.value = settings.storeName;
+    // set store name
+    storeElm.value = settings.storeName;
 
-  // set columns
-  Object.keys(columnOptions).forEach((key) => {
-    let opt = document.createElement("option");
-    opt.value = key;
-    opt.innerHTML = columnOptions[key];
-    if (settings.columns.includes(key)) opt.selected = true;
-    colElm.appendChild(opt);
-  });
-
-  // detch databases, fill selectbox
-  let p1 = fetchDatabases().then((data) => {
-    // fill selectbox
-    console.log(data);
-    let list = data.recordset;
-    databases = list.slice();
-    list.forEach((db) => {
+    // set columns
+    Object.keys(columnOptions).forEach((key) => {
       let opt = document.createElement("option");
-      let currOpt = settings.databaseName;
-      opt.value = db.name;
-      opt.innerHTML = db.name;
-      if (db.name == currOpt) opt.selected = true;
-      dbElm.appendChild(opt);
+      opt.value = key;
+      opt.innerHTML = columnOptions[key];
+      if (settings.columns.includes(key)) opt.selected = true;
+      colElm.appendChild(opt);
     });
-  });
 
-  // fetch usb devices, fill selectbox
-  let p2 = fetchUsbDevices().then((data) => {
-    console.log(data);
-    // remove redundent elements
-    let ids = [...new Set(data.map((d) => d.productId))];
-    let currDeviceId = settings.usbDevProductID;
-    usbDevices = data.slice();
-
-    ids.forEach((id) => {
-      let device = data.find((d) => d.productId === id);
-      let opt = document.createElement("option");
-      opt.value = id;
-      opt.innerHTML = `${device.product}-${id}`;
-      if (id == currDeviceId) opt.selected = true;
-      usbElm.appendChild(opt);
+    // detch databases, fill selectbox
+    let p1 = fetchDatabases().then((data) => {
+      // fill selectbox
+      console.log(data);
+      let list = data.recordset;
+      databases = list.slice();
+      list.forEach((db) => {
+        let opt = document.createElement("option");
+        let currOpt = settings.databaseName;
+        opt.value = db.name;
+        opt.innerHTML = db.name;
+        if (db.name == currOpt) opt.selected = true;
+        dbElm.appendChild(opt);
+      });
     });
-  });
 
-  Promise.all([p1, p2])
-    .then(() => {
-      // stop loading screen
-      // init select boxes
-      mcss.FormSelect.init(document.querySelectorAll("select"));
-    })
-    .catch((err) => {
-      console.log(err);
+    // fetch usb devices, fill selectbox
+    let p2 = fetchUsbDevices().then((data) => {
+      console.log(data);
+      // remove redundent elements
+      let ids = [...new Set(data.map((d) => d.productId))];
+      let currDeviceId = settings.usbDevProductID;
+      usbDevices = data.slice();
+
+      ids.forEach((id) => {
+        let device = data.find((d) => d.productId === id);
+        let opt = document.createElement("option");
+        opt.value = id;
+        opt.innerHTML = `${device.product}-${id}`;
+        if (id == currDeviceId) opt.selected = true;
+        usbElm.appendChild(opt);
+      });
     });
+
+    Promise.all([p1, p2])
+      .then(() => {
+        // stop loading screen
+        // init select boxes
+        mcss.FormSelect.init(document.querySelectorAll("select"));
+      })
+      .catch((error) => {
+        ipcRenderer.send("error-report", error);
+      });
+  } catch (error) {
+    ipcRenderer.send("error-report", error);
+  }
 }
 
 function saveSettings() {
-  let selects;
+  try {
+    let selects;
 
-  // get selected barcode reader
-  selects = mcss.FormSelect.getInstance(usbElm).dropdownOptions;
-  let br = [...selects.children].filter((n) => n.className === "selected")[0];
-  if (br) {
-    br = usbDevices.find(
-      (d) => `<span>${d.product}-${d.productId}</span>` === br.innerHTML
+    // get selected barcode reader
+    selects = mcss.FormSelect.getInstance(usbElm).dropdownOptions;
+    let br = [...selects.children].filter((n) => n.className === "selected")[0];
+    if (br) {
+      br = usbDevices.find(
+        (d) => `<span>${d.product}-${d.productId}</span>` === br.innerHTML
+      );
+    }
+
+    // get selected barcode reader
+    selects = mcss.FormSelect.getInstance(dbElm).dropdownOptions;
+    let db = [...selects.children].filter((n) => n.className === "selected")[0];
+    if (db) {
+      db = databases.find(
+        (item) => `<span>${item.name}</span>` === db.innerHTML
+      );
+    }
+
+    storage.setItem(
+      "settings",
+      JSON.stringify({
+        usbDevName: br ? br.product : "",
+        usbDevVendorID: br ? br.vendorId : "",
+        usbDevProductID: br ? br.productId : "",
+        databaseName: db ? db.name : "",
+        storeName: storeElm.value,
+        columns: mcss.FormSelect.getInstance(colElm).getSelectedValues(),
+      })
     );
+
+    currWin.close();
+  } catch (error) {
+    ipcRenderer.send("error-report", error);
   }
-
-  // get selected barcode reader
-  selects = mcss.FormSelect.getInstance(dbElm).dropdownOptions;
-  let db = [...selects.children].filter((n) => n.className === "selected")[0];
-  if (db) {
-    db = databases.find((item) => `<span>${item.name}</span>` === db.innerHTML);
-  }
-
-  storage.setItem(
-    "settings",
-    JSON.stringify({
-      usbDevName: br ? br.product : "",
-      usbDevVendorID: br ? br.vendorId : "",
-      usbDevProductID: br ? br.productId : "",
-      databaseName: db ? db.name : "",
-      storeName: storeElm.value,
-      columns: mcss.FormSelect.getInstance(colElm).getSelectedValues(),
-    })
-  );
-
-  currWin.close();
 }
