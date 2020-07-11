@@ -1,25 +1,42 @@
 {
-  "name": "barcode-reader-dasht",
+  "name": "dasht-price-checker",
   "version": "1.0.0",
-  "description": "",
+  "description": "استعلام قیمت از نرم افزار دشت همکاران سیستم",
   "main": "./src/main.js",
   "scripts": {
     "start": "electron .",
     "rebuild-linux": "$(npm bin)/electron-rebuild",
-    "rebuild-win": "./node_modules/.bin/electron-rebuild.cmd"
+    "rebuild-win": "./node_modules/.bin/electron-rebuild.cmd",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.electron.${name}",
+    "productName": "Dasht Price Checker",
+    "copyright": "Copyright © 2020 ${author}",
+    "files": [
+      "**/*",
+      "build/icon.*"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "build/icon.ico"
+    }
   },
   "keywords": [],
   "author": "Ahmad-Fz",
   "license": "ISC",
-  "dependencies": {
-    "electron": "^9.0.5",
+  "dependencies": {    
     "lodash": "^4.17.15",
-    "materialize-css": "^1.0.0-rc.2",    
+    "materialize-css": "^1.0.0-rc.2",
     "mssql": "^6.2.0",
     "msnodesqlv8": "^1.1.7",
     "usb-barcode-scanner": "^1.0.2"
   },
   "devDependencies": {
+    "electron": "^9.0.5",
+    "electron-builder": "^22.7.0",
     "electron-rebuild": "^1.11.0"
   }
 }
