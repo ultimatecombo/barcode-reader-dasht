@@ -24,11 +24,11 @@ ipcMain.on("usb-get-list", (event, args) => {
 });
 
 ipcMain.on("usb-start-scan", (event, args) => {
-  startScan(args.vendorId, args.productId);
+  usbStartScan(args.vendorId, args.productId);
 });
 
 ipcMain.on("usb-stop-scan", () => {
-  stopScan();
+  usbStopScan();
 });
 
 ipcMain.on("db-get-list", (event, args) => {
@@ -130,7 +130,7 @@ function createWindow() {
   mainWindow.loadFile("./views/index.html");
 }
 
-function startScan(vendorId, productId) {
+function usbStartScan(vendorId, productId) {
   try {
     scanner = new UsbScanner({
       vendorId: vendorId,
@@ -147,7 +147,7 @@ function startScan(vendorId, productId) {
   }
 }
 
-function stopScan() {
+function usbStopScan() {
   scanner.stopScanning();
 }
 
