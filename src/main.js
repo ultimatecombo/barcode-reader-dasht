@@ -32,51 +32,63 @@ app.whenReady().then(createWindow);
 
 // fetch connected usb devices list
 ipcMain.on("get-usb-list", (event, args) => {
-  event.sender.send("usb-list", getDevices());
+  try {
+    let list = getDevices();
+    event.sender.send("usb-list", list);
+  } catch (error) {
+    handleError(error);
+  }
 });
 
 ipcMain.on("db-query-item", (event, args) => {
-  if (connectionPool) {
+  try {
+    if (!connectionPool) return;
     connectionPool.connect().then(() => {
       connectionPool.request().query(
         `
-        SELECT CASE
-        WHEN ItemBarCode IS NULL AND ItemIranCode IS NULL THEN ItemCode+' '+ItemTitle
-        WHEN ItemBarCode IS NULL AND ItemIranCode IS NOT NULL THEN ItemCode+' - '+ItemIranCode+' - '+ItemTitle
-        WHEN ItemBarCode IS NOT NULL AND ItemIranCode IS NULL THEN ItemCode+' - '+ItemBarCode+' - '+ItemTitle
-        WHEN ItemBarCode IS NOT NULL AND ItemIranCode IS NOT NULL THEN ItemCode+' - '+ItemBarCode+' - '+ItemIranCode+' - '+ItemTitle
-        ELSE '' END ForSearch,'هر '+UnitTitle+'، '+ItemTitle ItemName
-        ,ItemCode,ItemBarCode,ItemIranCode,ItemTitle,UnitTitle,DefaultPrice,Price1,
-        CASE WHEN Price1-DefaultPrice >0 THEN Price1-DefaultPrice ELSE 0 END Dicount
-        FROM POS.vwItemSalePrice
-        WHERE ItemSubUnitRef IS NULL AND 
-        (ItemBarCode LIKE '${args}' OR itemIranCode LIKE '${args}' OR ItemTitle LIKE '${args}') `,
+          SELECT CASE
+          WHEN ItemBarCode IS NULL AND ItemIranCode IS NULL THEN ItemCode+' '+ItemTitle
+          WHEN ItemBarCode IS NULL AND ItemIranCode IS NOT NULL THEN ItemCode+' - '+ItemIranCode+' - '+ItemTitle
+          WHEN ItemBarCode IS NOT NULL AND ItemIranCode IS NULL THEN ItemCode+' - '+ItemBarCode+' - '+ItemTitle
+          WHEN ItemBarCode IS NOT NULL AND ItemIranCode IS NOT NULL THEN ItemCode+' - '+ItemBarCode+' - '+ItemIranCode+' - '+ItemTitle
+          ELSE '' END ForSearch,'هر '+UnitTitle+'، '+ItemTitle ItemName
+          ,ItemCode,ItemBarCode,ItemIranCode,ItemTitle,UnitTitle,DefaultPrice,Price1,
+          CASE WHEN Price1-DefaultPrice >0 THEN Price1-DefaultPrice ELSE 0 END Dicount
+          FROM POS.vwItemSalePrice
+          WHERE ItemSubUnitRef IS NULL AND 
+          (ItemBarCode LIKE '${args}' OR itemIranCode LIKE '${args}' OR ItemTitle LIKE '${args}') `,
         (err, result) => {
-          if (err) console.log(err);
+          if (err) handleError(err);
           else event.sender.send("db-query-result", result);
         }
       );
     });
+  } catch (error) {
+    handleError(error);
   }
 });
 
 ipcMain.on("get-database-list", (event, args) => {
-  let pool = new sql.ConnectionPool({
-    server: `${os.hostname()}\\SQLEXPRESS`,
-    driver: "msnodesqlv8",
-    options: {
-      trustedConnection: true,
-    },
-  });
+  try {
+    let pool = new sql.ConnectionPool({
+      server: `${os.hostname()}\\SQLEXPRESS`,
+      driver: "msnodesqlv8",
+      options: {
+        trustedConnection: true,
+      },
+    });
 
-  pool.connect().then(() => {
-    pool
-      .request()
-      .query("SELECT name FROM master.sys.databases", (err, result) => {
-        if (err) console.log(err);
-        else event.sender.send("database-list", result);
-      });
-  });
+    pool.connect().then(() => {
+      pool
+        .request()
+        .query("SELECT name FROM master.sys.databases", (err, result) => {
+          if (err) console.log(err);
+          else event.sender.send("database-list", result);
+        });
+    });
+  } catch (error) {
+    handleError(error);
+  }
 });
 
 ipcMain.on("start-barcode-scan", (event, args) => {
@@ -106,25 +118,27 @@ ipcMain.on("db-connection-test", (event, args) => {
 });
 
 ipcMain.on("db-create-connection", (event, dbName) => {
-  if (connectionPool === null) {
-    let config = {
-      database: dbName,
-      server: `${os.hostname()}\\SQLEXPRESS`,
-      driver: "msnodesqlv8",
-      options: {
-        trustedConnection: true,
-      },
-    };
+  try {
+    if (connectionPool === null) {
+      let config = {
+        database: dbName,
+        server: `${os.hostname()}\\SQLEXPRESS`,
+        driver: "msnodesqlv8",
+        options: {
+          trustedConnection: true,
+        },
+      };
 
-    connectionPool = createConnectionPool(config);
+      connectionPool = createConnectionPool(config);
+    }
+  } catch (error) {
+    handleError(error);
   }
 });
 
 // get error reports and send them to main window
 // to display to user
-ipcMain.on("error-report", (event, error) => {
-  mainWindow.webContents.send("error-show", error);
-});
+ipcMain.on("error-report", (event, error) => handleError(error));
 
 function startScan(vendorId, productId) {
   try {
@@ -139,7 +153,7 @@ function startScan(vendorId, productId) {
 
     scanner.startScanning();
   } catch (error) {
-    console.log(error);
+    handleError(error);
   }
 }
 
@@ -148,9 +162,15 @@ function stopScan() {
 }
 
 function createConnectionPool(config) {
-  let pool = new sql.ConnectionPool(config);
-  pool.on("error", (err) => {
-    ipcMain.emit("db-connection-error", err);
-  });
-  return pool;
+  try {
+    let pool = new sql.ConnectionPool(config);
+    pool.on("error", (error) => handleError(error));
+    return pool;
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+function handleError(error) {
+  mainWindow.webContents.send("error-show", error);
 }
