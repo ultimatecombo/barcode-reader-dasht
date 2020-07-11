@@ -13,8 +13,8 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
 
-// fetch connected usb devices list
-ipcMain.on("usb-get-list", (event, args) => {
+// get connected usb devices list
+ipcMain.on("usb-get-list", (event) => {
   try {
     let list = getDevices();
     event.sender.send("usb-list", list);
@@ -23,15 +23,14 @@ ipcMain.on("usb-get-list", (event, args) => {
   }
 });
 
-ipcMain.on("usb-start-scan", (event, args) => {
-  usbStartScan(args.vendorId, args.productId);
+ipcMain.on("scanner-start", () => scannerStart());
+ipcMain.on("scanner-stop", () => scannerStop());
+ipcMain.on("scanner-create", (event, args) => {
+  let result = createUsbScanner(args.vendorId, args.productId);
+  event.sender.send("scanner-create-result", result);
 });
 
-ipcMain.on("usb-stop-scan", () => {
-  usbStopScan();
-});
-
-ipcMain.on("db-get-list", (event, args) => {
+ipcMain.on("db-get-list", (event) => {
   try {
     let pool = new sql.ConnectionPool({
       server: `${os.hostname()}\\SQLEXPRESS`,
@@ -44,8 +43,8 @@ ipcMain.on("db-get-list", (event, args) => {
     pool.connect().then(() => {
       pool
         .request()
-        .query("SELECT name FROM master.sys.databases", (err, result) => {
-          if (err) console.log(err);
+        .query("SELECT name FROM MASTER.sys.databases", (error, result) => {
+          if (error) handleError(error);
           else event.sender.send("db-list", result);
         });
     });
@@ -70,8 +69,8 @@ ipcMain.on("db-query-item", (event, args) => {
           FROM POS.vwItemSalePrice
           WHERE ItemSubUnitRef IS NULL AND 
           (ItemBarCode LIKE '${args}' OR itemIranCode LIKE '${args}' OR ItemTitle LIKE '${args}') `,
-        (err, result) => {
-          if (err) handleError(err);
+        (error, result) => {
+          if (error) handleError(error);
           else event.sender.send("db-query-result", result);
         }
       );
@@ -81,18 +80,20 @@ ipcMain.on("db-query-item", (event, args) => {
   }
 });
 
-ipcMain.on("db-connection-test", (event, args) => {
+ipcMain.on("db-connection-test", (event) => {
   try {
     dbConnection
       .connect()
       .then(() => {
-        event.sender.send("db-connection-success");
+        event.sender.send("db-test-result", true);
       })
-      .catch((err) => {
-        event.sender.send("db-connection-failed", err);
+      .catch((error) => {
+        event.sender.send("db-test-result", false);
+        handleError(error);
       });
   } catch (error) {
-    event.sender.send("db-connection-failed", err);
+    event.sender.send("db-test-result", false);
+    handleError(error);
   }
 });
 
@@ -107,16 +108,21 @@ ipcMain.on("db-create-connection", (event, dbName) => {
       },
     };
     dbConnection = createConnectionPool(config);
+    dbConnection.on("error", (error) => handleError(error));
   } catch (error) {
     handleError(error);
   }
+});
+
+ipcMain.on("settings-updated", () => {
+  mainWindow.webContents.send("apply-settings");
 });
 
 // get error reports from renderes
 ipcMain.on("error-report", (event, error) => handleError(error));
 
 function createWindow() {
-  let mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 700,
     height: 900,
     minWidth: 700,
@@ -128,9 +134,10 @@ function createWindow() {
   });
 
   mainWindow.loadFile("./views/index.html");
+  mainWindow.webContents.openDevTools();
 }
 
-function usbStartScan(vendorId, productId) {
+function createUsbScanner(vendorId, productId) {
   try {
     scanner = new UsbScanner({
       vendorId: vendorId,
@@ -138,24 +145,35 @@ function usbStartScan(vendorId, productId) {
     });
 
     scanner.on("data", (data) => {
-      console.log(data);
+      mainWindow.webContents.send("scanner-data", data);
     });
 
+    return true;
+  } catch (error) {
+    handleError(error);
+    return false;
+  }
+}
+
+function scannerStart() {
+  try {
     scanner.startScanning();
   } catch (error) {
     handleError(error);
   }
 }
 
-function usbStopScan() {
-  scanner.stopScanning();
+function scannerStop() {
+  try {
+    scanner.stopScanning();
+  } catch (error) {
+    handleError(error);
+  }
 }
 
 function createConnectionPool(config) {
   try {
-    let pool = new sql.ConnectionPool(config);
-    pool.on("error", (error) => handleError(error));
-    return pool;
+    return new sql.ConnectionPool(config);
   } catch (error) {
     handleError(error);
   }
