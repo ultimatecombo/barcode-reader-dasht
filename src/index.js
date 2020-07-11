@@ -22,6 +22,12 @@ const currWin = remote.getCurrentWindow(),
 
 initWindow();
 
+ipcRenderer.on("scanner-data", (event, data) => {
+  console.log(`scanned: ${data}`);
+  searchbox.value = data;
+  searchbox.dispatchEvent(new Event("change"));
+});
+
 ipcRenderer.on("db-query-result", (event, args) => {
   console.log(args);
   if (args.recordset.length > 0) showQueryResult(args.recordset[0]);
@@ -73,7 +79,11 @@ function initWindow() {
   });
   searchbox.addEventListener(
     "keydown",
-    _.debounce(() => queryItem(searchbox.value), 1200)
+    _.debounce(() => queryItem(searchbox.value), 1000)
+  );
+  searchbox.addEventListener(
+    "change",
+    _.debounce(() => queryItem(searchbox.value), 1000)
   );
 
   // init help tooltips
