@@ -139,6 +139,7 @@ function saveSettings() {
       })
     );
 
+    ipcRenderer.send("settings-updated");
     currWin.close();
   } catch (error) {
     ipcRenderer.send("error-report", error);
