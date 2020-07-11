@@ -1,10 +1,10 @@
 @font-face {
-  font-family: yekan;
-  src: url("../fonts/yekan.ttf");
+  font-family: customFont;
+  src: url("../fonts/Vazir-Bold-FD-WOL.ttf");
 }
 
 :root {
-  --font-family: yekan;
+  --font-family: customFont;
   --font-size-xsmall: 17px;
   --font-size-small: 22px;
   --font-size-medium: 25px;
