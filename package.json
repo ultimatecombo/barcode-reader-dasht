@@ -9,15 +9,14 @@
     "rebuild-win": "./node_modules/.bin/electron-rebuild.cmd"
   },
   "keywords": [],
-  "author": "",
+  "author": "Ahmad-Fz",
   "license": "ISC",
   "dependencies": {
     "electron": "^9.0.5",
     "lodash": "^4.17.15",
-    "materialize-css": "^1.0.0-rc.2",
-    "msnodesqlv8": "^1.1.7",
+    "materialize-css": "^1.0.0-rc.2",    
     "mssql": "^6.2.0",
-    "node-hid": "^1.3.0",
+    "msnodesqlv8": "^1.1.7",
     "usb-barcode-scanner": "^1.0.2"
   },
   "devDependencies": {
