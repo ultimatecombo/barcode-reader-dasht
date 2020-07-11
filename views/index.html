@@ -39,6 +39,11 @@
             <i class="fas fa-minus"></i>
           </button>
 
+          <!-- maximize button -->
+          <button id="maximizeBtn" class="btn-flat waves-effect waves-teal">
+            <i class="fas fa-expand"></i>
+          </button>
+
           <!-- exit button -->
           <button id="closeBtn" class="btn-flat waves-effect waves-teal">
             <i class="fas fa-times"></i>
@@ -109,11 +114,11 @@
 
       <!-- statusbar -->
       <div class="statusbar">
+        <div id="statusMsg" class="statusbar__msg"></div>
         <div class="statusbar__icons">
           <i id="scannerStatus" class="fas fa-cash-register disconnected"></i>
           <i id="databaseStatus" class="fas fa-database disconnected"></i>
         </div>
-        <div id="statusMsg" class="statusbar__msg"></div>
       </div>
     </div>
   </body>

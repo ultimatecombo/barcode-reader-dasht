@@ -14,6 +14,7 @@ const currWin = remote.getCurrentWindow(),
   itemPriceElm = document.getElementById("itemPrice"),
   settingsBtn = document.getElementById("settingsBtn"),
   minimizeBtn = document.getElementById("minimizeBtn"),
+  maximizeBtn = document.getElementById("maximizeBtn"),
   closeBtn = document.getElementById("closeBtn"),
   scannerStat = document.getElementById("scannerStatus"),
   databaseStat = document.getElementById("databaseStatus"),
@@ -106,6 +107,13 @@ function initWindow() {
     currWin.close();
   });
   minimizeBtn.addEventListener("click", () => currWin.minimize());
+  maximizeBtn.addEventListener("click", () => {
+    if (currWin.isMaximized()) {
+      currWin.unmaximize();
+    } else {
+      currWin.maximize();
+    }
+  });
 }
 
 // initialize settings field in local storage
