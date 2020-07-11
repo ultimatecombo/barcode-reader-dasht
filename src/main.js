@@ -7,28 +7,11 @@ let mainWindow = null,
   scanner = null,
   dbConnection = null;
 
-function createWindow() {
-  let mainWindow = new BrowserWindow({
-    width: 700,
-    height: 900,
-    minWidth: 700,
-    minHeight: 700,
-    frame: false,
-    webPreferences: {
-      nodeIntegration: true,
-    },
-  });
-
-  mainWindow.loadFile("./views/index.html");
-}
-
+app.whenReady().then(createWindow);
 app.on("window-all-closed", app.quit);
-
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
-
-app.whenReady().then(createWindow);
 
 // fetch connected usb devices list
 ipcMain.on("usb-get-list", (event, args) => {
@@ -131,6 +114,21 @@ ipcMain.on("db-create-connection", (event, dbName) => {
 
 // get error reports from renderes
 ipcMain.on("error-report", (event, error) => handleError(error));
+
+function createWindow() {
+  let mainWindow = new BrowserWindow({
+    width: 700,
+    height: 900,
+    minWidth: 700,
+    minHeight: 700,
+    frame: false,
+    webPreferences: {
+      nodeIntegration: true,
+    },
+  });
+
+  mainWindow.loadFile("./views/index.html");
+}
 
 function startScan(vendorId, productId) {
   try {
