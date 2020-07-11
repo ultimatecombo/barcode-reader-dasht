@@ -25,15 +25,15 @@ closeBtn.addEventListener("click", () => currWin.close());
 
 function fetchUsbDevices() {
   return new Promise((resolve, reject) => {
-    ipcRenderer.send("get-usb-list");
+    ipcRenderer.send("usb-get-list");
     ipcRenderer.on("usb-list", (event, args) => resolve(args));
   });
 }
 
 function fetchDatabases() {
   return new Promise((resolve, reject) => {
-    ipcRenderer.send("get-database-list");
-    ipcRenderer.on("database-list", (event, args) => resolve(args));
+    ipcRenderer.send("db-get-list");
+    ipcRenderer.on("db-list", (event, args) => resolve(args));
   });
 }
 

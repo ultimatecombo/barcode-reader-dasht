@@ -31,10 +31,41 @@ app.on("activate", () => {
 app.whenReady().then(createWindow);
 
 // fetch connected usb devices list
-ipcMain.on("get-usb-list", (event, args) => {
+ipcMain.on("usb-get-list", (event, args) => {
   try {
     let list = getDevices();
     event.sender.send("usb-list", list);
+  } catch (error) {
+    handleError(error);
+  }
+});
+
+ipcMain.on("usb-start-scan", (event, args) => {
+  startScan(args.vendorId, args.productId);
+});
+
+ipcMain.on("usb-stop-scan", () => {
+  stopScan();
+});
+
+ipcMain.on("db-get-list", (event, args) => {
+  try {
+    let pool = new sql.ConnectionPool({
+      server: `${os.hostname()}\\SQLEXPRESS`,
+      driver: "msnodesqlv8",
+      options: {
+        trustedConnection: true,
+      },
+    });
+
+    pool.connect().then(() => {
+      pool
+        .request()
+        .query("SELECT name FROM master.sys.databases", (err, result) => {
+          if (err) console.log(err);
+          else event.sender.send("db-list", result);
+        });
+    });
   } catch (error) {
     handleError(error);
   }
@@ -66,37 +97,6 @@ ipcMain.on("db-query-item", (event, args) => {
   } catch (error) {
     handleError(error);
   }
-});
-
-ipcMain.on("get-database-list", (event, args) => {
-  try {
-    let pool = new sql.ConnectionPool({
-      server: `${os.hostname()}\\SQLEXPRESS`,
-      driver: "msnodesqlv8",
-      options: {
-        trustedConnection: true,
-      },
-    });
-
-    pool.connect().then(() => {
-      pool
-        .request()
-        .query("SELECT name FROM master.sys.databases", (err, result) => {
-          if (err) console.log(err);
-          else event.sender.send("database-list", result);
-        });
-    });
-  } catch (error) {
-    handleError(error);
-  }
-});
-
-ipcMain.on("start-barcode-scan", (event, args) => {
-  startScan(args.vendorId, args.productId);
-});
-
-ipcMain.on("stop-barcode-scan", () => {
-  stopScan();
 });
 
 ipcMain.on("db-connection-test", (event, args) => {
