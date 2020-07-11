@@ -162,7 +162,10 @@ function loadSettings() {
     ipcRenderer.send("db-connection-test");
   }
 
-  if (userSettings.usbDevName) {
+  if (
+    userSettings.userSettings.usbDevVendorID &&
+    userSettings.usbDevProductID
+  ) {
     ipcRenderer.send("scanner-create", {
       vendorId: userSettings.usbDevVendorID,
       productId: userSettings.usbDevProductID,
