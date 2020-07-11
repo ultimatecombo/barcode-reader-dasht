@@ -148,36 +148,37 @@ function initLocalStorage() {
 
 // load user settings
 function loadSettings() {
-  let userSettings = JSON.parse(storage.getItem("settings"));
+  try {
+    let userSettings = JSON.parse(storage.getItem("settings"));
 
-  // show store name in title
-  currWin.title = document.getElementById(
-    "titlebar__title"
-  ).innerHTML = `استعلام قیمت${
-    userSettings.storeName ? " - " + userSettings.storeName : ""
-  }`;
+    // show store name in title
+    currWin.title = document.getElementById(
+      "titlebar__title"
+    ).innerHTML = `استعلام قیمت${
+      userSettings.storeName ? " - " + userSettings.storeName : ""
+    }`;
 
-  if (userSettings.databaseName) {
-    ipcRenderer.send("db-create-connection", userSettings.databaseName);
-    ipcRenderer.send("db-connection-test");
-  }
+    if (userSettings.databaseName) {
+      ipcRenderer.send("db-create-connection", userSettings.databaseName);
+      ipcRenderer.send("db-connection-test");
+    }
 
-  if (
-    userSettings.userSettings.usbDevVendorID &&
-    userSettings.usbDevProductID
-  ) {
-    ipcRenderer.send("scanner-create", {
-      vendorId: userSettings.usbDevVendorID,
-      productId: userSettings.usbDevProductID,
-    });
-  }
+    if (userSettings.usbDevVendorID && userSettings.usbDevProductID) {
+      ipcRenderer.send("scanner-create", {
+        vendorId: userSettings.usbDevVendorID,
+        productId: userSettings.usbDevProductID,
+      });
+    }
 
-  if (userSettings.columns) {
-    ["itemBarcode", "itemDesc"].forEach((col) => {
-      let elm = document.getElementById(col).parentElement;
-      if (userSettings.columns.includes(col)) elm.style.display = "block";
-      else elm.style.display = "none";
-    });
+    if (userSettings.columns) {
+      ["itemBarcode", "itemDesc"].forEach((col) => {
+        let elm = document.getElementById(col).parentElement;
+        if (userSettings.columns.includes(col)) elm.style.display = "block";
+        else elm.style.display = "none";
+      });
+    }
+  } catch (error) {
+    showToastMessage(error, 600000);
   }
 }
 
