@@ -5,7 +5,7 @@ const { UsbScanner, getDevices } = require("usb-barcode-scanner");
 
 let mainWindow = null,
   scanner = null,
-  connectionPool = null;
+  dbConnection = null;
 
 function createWindow() {
   let mainWindow = new BrowserWindow({
@@ -73,9 +73,8 @@ ipcMain.on("db-get-list", (event, args) => {
 
 ipcMain.on("db-query-item", (event, args) => {
   try {
-    if (!connectionPool) return;
-    connectionPool.connect().then(() => {
-      connectionPool.request().query(
+    dbConnection.connect().then(() => {
+      dbConnection.request().query(
         `
           SELECT CASE
           WHEN ItemBarCode IS NULL AND ItemIranCode IS NULL THEN ItemCode+' '+ItemTitle
@@ -100,8 +99,8 @@ ipcMain.on("db-query-item", (event, args) => {
 });
 
 ipcMain.on("db-connection-test", (event, args) => {
-  if (connectionPool) {
-    connectionPool
+  try {
+    dbConnection
       .connect()
       .then(() => {
         event.sender.send("db-connection-success");
@@ -109,28 +108,22 @@ ipcMain.on("db-connection-test", (event, args) => {
       .catch((err) => {
         event.sender.send("db-connection-failed", err);
       });
-  } else {
-    event.sender.send(
-      "db-connection-failed",
-      new Error("no connection pool defined")
-    );
+  } catch (error) {
+    event.sender.send("db-connection-failed", err);
   }
 });
 
 ipcMain.on("db-create-connection", (event, dbName) => {
   try {
-    if (connectionPool === null) {
-      let config = {
-        database: dbName,
-        server: `${os.hostname()}\\SQLEXPRESS`,
-        driver: "msnodesqlv8",
-        options: {
-          trustedConnection: true,
-        },
-      };
-
-      connectionPool = createConnectionPool(config);
-    }
+    let config = {
+      database: dbName,
+      server: `${os.hostname()}\\SQLEXPRESS`,
+      driver: "msnodesqlv8",
+      options: {
+        trustedConnection: true,
+      },
+    };
+    dbConnection = createConnectionPool(config);
   } catch (error) {
     handleError(error);
   }
