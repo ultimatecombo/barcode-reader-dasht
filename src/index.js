@@ -14,7 +14,10 @@ const currWin = remote.getCurrentWindow(),
   itemPriceElm = document.getElementById("itemPrice"),
   settingsBtn = document.getElementById("settingsBtn"),
   minimizeBtn = document.getElementById("minimizeBtn"),
-  closeBtn = document.getElementById("closeBtn");
+  closeBtn = document.getElementById("closeBtn"),
+  scannerStat = document.getElementById("scannerStatus"),
+  databaseStat = document.getElementById("databaseStatus"),
+  statusMsgElm = document.getElementById("statusMsg");
 
 initWindow();
 
@@ -27,9 +30,11 @@ ipcRenderer.on("db-query-result", (event, args) => {
 ipcRenderer.on("db-test-result", (event, result) => {
   console.log(`database: ${result}`)
   if (result) {
-
+    databaseStat.classList.replace("disconnected", "connected");
+    statusMsgElm.innerHTML = "";
   } else {
-
+    databaseStat.classList.replace("connected", "disconnected");
+    statusMsgElm.innerHTML = 'خطا در اتصال به داده';
   }
 });
 
@@ -37,8 +42,11 @@ ipcRenderer.on("scanner-create-result", (event, result) => {
   console.log(`scanner: ${result}`)
   if (result) {
     ipcRenderer.send("scanner-start");
+    scannerStat.classList.replace("disconnected", "connected");
+    statusMsgElm.innerHTML = "";
   } else {
-
+    scannerStat.classList.replace("connected", "disconnected");
+    statusMsgElm.innerHTML = 'خطا در اتصال به بارکدخوان';
   }
 });
 

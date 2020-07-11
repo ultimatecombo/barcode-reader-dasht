@@ -96,13 +96,11 @@
                   قیمت کالا:
                 </div>
                 <div class="item-price__price">
-                  <div id="itemPrice" class="item-price__value">
-                    
-                  </div>
+                  <div id="itemPrice" class="item-price__value"></div>
                   <div class="item-price__unit">
                     ریال
                   </div>
-                </div>                
+                </div>
               </div>
             </div>
           </div>
@@ -112,12 +110,10 @@
       <!-- statusbar -->
       <div class="statusbar">
         <div class="statusbar__icons">
-          <i class="fas fa-plug disconnected"></i>
-          <i class="fas fa-database connected"></i>
+          <i id="scannerStatus" class="fas fa-cash-register disconnected"></i>
+          <i id="databaseStatus" class="fas fa-database disconnected"></i>
         </div>
-        <div class="statusbar__msg">
-          در حال اتصال...
-        </div>
+        <div id="statusMsg" class="statusbar__msg"></div>
       </div>
     </div>
   </body>
