@@ -105,7 +105,8 @@ textarea {
 
 .statusbar__icons {
   display: flex;
-  align-items: center;
+  align-items: center;  
+  margin-right: auto;
 }
 
 .statusbar__icons i {
@@ -131,7 +132,6 @@ textarea {
 
 .statusbar__msg {
   color: var(--titlebar-text-color);
-  margin-right: auto;
   font-size: 0.65rem;
 }
 
