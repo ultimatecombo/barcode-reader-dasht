@@ -136,8 +136,7 @@ ipcMain.on("db-create-connection", (event, dbName) => {
   }
 });
 
-// get error reports and send them to main window
-// to display to user
+// get error reports from renderes
 ipcMain.on("error-report", (event, error) => handleError(error));
 
 function startScan(vendorId, productId) {
@@ -172,5 +171,7 @@ function createConnectionPool(config) {
 }
 
 function handleError(error) {
+  // send error messages to main window to
+  // show them to user.
   mainWindow.webContents.send("error-show", error);
 }
