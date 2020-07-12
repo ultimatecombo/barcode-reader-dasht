@@ -107,6 +107,7 @@ function initSettings() {
         if (id == currDeviceId) opt.selected = true;
         usbElm.appendChild(opt);
       });
+      mcss.FormSelect.init(document.querySelectorAll("select"));
     });
 
     if (settings.serverName) {
@@ -124,15 +125,14 @@ function initSettings() {
           if (db.name == currOpt) opt.selected = true;
           dbElm.appendChild(opt);
         });
+        mcss.FormSelect.init(document.querySelectorAll("select"));
       });
     } else {
       p2 = Promise.resolve();
       dbElm.disabled = true;
     }
 
-    Promise.all([p1, p2]).then(() => {
-      mcss.FormSelect.init(document.querySelectorAll("select"));
-    });
+    mcss.FormSelect.init(document.querySelectorAll("select"));
   } catch (error) {
     ipcRenderer.send("error-report", error);
   }
