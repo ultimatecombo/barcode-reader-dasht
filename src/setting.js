@@ -24,23 +24,30 @@ connectBtn.addEventListener("click", () => {
   let settings = JSON.parse(storage.getItem("settings"));
 
   // detch databases, fill selectbox
-  fetchDatabases(serverElm.value)
-    .then((data) => {
-      // fill selectbox
-      console.log(data);
-      let list = data.recordset;
-      databases = list.slice();
-      dbElm.disabled = false;
-      list.forEach((db) => {
-        let opt = document.createElement("option");
-        let currOpt = settings.databaseName;
-        opt.value = db.name;
-        opt.innerHTML = db.name;
-        if (db.name == currOpt) opt.selected = true;
-        dbElm.appendChild(opt);
-      });
-      mcss.FormSelect.init(document.querySelectorAll("select"))
+  fetchDatabases(serverElm.value).then((data) => {
+    // fill selectbox
+    console.log(data);
+    let list = data.recordset;
+    databases = list.slice();
+
+    // remove current list
+    [...dbElm.children].forEach((n) => {
+      if (!n.disabled) n.remove();
     });
+
+    dbElm.disabled = false;
+
+    // add new list
+    list.forEach((db) => {
+      let opt = document.createElement("option");
+      let currOpt = settings.databaseName;
+      opt.value = db.name;
+      opt.innerHTML = db.name;
+      if (db.name == currOpt) opt.selected = true;
+      dbElm.appendChild(opt);
+    });
+    mcss.FormSelect.init(document.querySelectorAll("select"));
+  });
 });
 
 // save user settings in locale storage
@@ -48,7 +55,6 @@ saveBtn.addEventListener("click", () => saveSettings());
 
 // close setting window
 closeBtn.addEventListener("click", () => currWin.close());
-
 
 function fetchUsbDevices() {
   return new Promise((resolve, reject) => {
@@ -71,7 +77,7 @@ function initSettings() {
         itemBarcode: "بارکد",
         itemDesc: "توضیحات",
       };
-      
+
     storeElm.value = settings.storeName;
     serverElm.value = settings.serverName;
     dbElm.disabled = false;
@@ -86,23 +92,22 @@ function initSettings() {
     });
 
     let p1, p2;
-    p1 = fetchUsbDevices()
-      .then((data) => {
-        console.log(data);
-        // remove redundent elements
-        let ids = [...new Set(data.map((d) => d.productId))];
-        let currDeviceId = settings.usbDevProductID;
-        usbDevices = data.slice();
+    p1 = fetchUsbDevices().then((data) => {
+      console.log(data);
+      // remove redundent elements
+      let ids = [...new Set(data.map((d) => d.productId))];
+      let currDeviceId = settings.usbDevProductID;
+      usbDevices = data.slice();
 
-        ids.forEach((id) => {
-          let device = data.find((d) => d.productId === id);
-          let opt = document.createElement("option");
-          opt.value = id;
-          opt.innerHTML = `${device.product}-${id}`;
-          if (id == currDeviceId) opt.selected = true;
-          usbElm.appendChild(opt);
-        });
+      ids.forEach((id) => {
+        let device = data.find((d) => d.productId === id);
+        let opt = document.createElement("option");
+        opt.value = id;
+        opt.innerHTML = `${device.product}-${id}`;
+        if (id == currDeviceId) opt.selected = true;
+        usbElm.appendChild(opt);
       });
+    });
 
     if (settings.serverName) {
       p2 = fetchDatabases(serverElm.value).then((data) => {
@@ -123,7 +128,7 @@ function initSettings() {
     } else {
       p2 = Promise.resolve();
       dbElm.disabled = true;
-    }    
+    }
 
     Promise.all([p1, p2]).then(() => {
       mcss.FormSelect.init(document.querySelectorAll("select"));
