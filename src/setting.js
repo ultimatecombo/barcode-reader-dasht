@@ -23,19 +23,24 @@ initSettings();
 connectBtn.addEventListener("click", () => {
   let settings = JSON.parse(storage.getItem("settings"));
 
+  // disable db list till the
+  // list comes back from main
+  dbElm.disabled = true;
+  mcss.FormSelect.init(document.querySelectorAll("select"));
+
   // detch databases, fill selectbox
   fetchDatabases(serverElm.value).then((data) => {
     // fill selectbox
     console.log(data);
     let list = data.recordset;
     databases = list.slice();
+    dbElm.disabled = false;
 
     // remove current list
     [...dbElm.children].forEach((n) => {
       if (!n.disabled) n.remove();
+      else n.selected = true;
     });
-
-    dbElm.disabled = false;
 
     // add new list
     list.forEach((db) => {
@@ -90,9 +95,8 @@ function initSettings() {
       if (settings.columns.includes(key)) opt.selected = true;
       colElm.appendChild(opt);
     });
-
-    let p1, p2;
-    p1 = fetchUsbDevices().then((data) => {
+    
+    fetchUsbDevices().then((data) => {
       console.log(data);
       // remove redundent elements
       let ids = [...new Set(data.map((d) => d.productId))];
@@ -111,7 +115,7 @@ function initSettings() {
     });
 
     if (settings.serverName) {
-      p2 = fetchDatabases(serverElm.value).then((data) => {
+      fetchDatabases(serverElm.value).then((data) => {
         // fill selectbox
         console.log(data);
         let list = data.recordset;
@@ -127,8 +131,7 @@ function initSettings() {
         });
         mcss.FormSelect.init(document.querySelectorAll("select"));
       });
-    } else {
-      p2 = Promise.resolve();
+    } else {      
       dbElm.disabled = true;
     }
 
