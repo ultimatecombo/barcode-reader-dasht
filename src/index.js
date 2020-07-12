@@ -38,10 +38,8 @@ ipcRenderer.on("db-test-result", (event, result) => {
   console.log(`database: ${result}`);
   if (result) {
     databaseStat.classList.replace("disconnected", "connected");
-    statusMsgElm.innerHTML = "";
   } else {
     databaseStat.classList.replace("connected", "disconnected");
-    statusMsgElm.innerHTML = "خطا در اتصال به داده";
   }
 });
 
@@ -50,10 +48,8 @@ ipcRenderer.on("scanner-create-result", (event, result) => {
   if (result) {
     ipcRenderer.send("scanner-start");
     scannerStat.classList.replace("disconnected", "connected");
-    statusMsgElm.innerHTML = "";
   } else {
     scannerStat.classList.replace("connected", "disconnected");
-    statusMsgElm.innerHTML = "خطا در اتصال به بارکدخوان";
   }
 });
 
