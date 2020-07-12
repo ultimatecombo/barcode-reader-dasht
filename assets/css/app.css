@@ -65,11 +65,12 @@ textarea {
 .titlebar__title {
   color: var(--titlebar-text-color);
   margin: 0px 5px;
+  font-size: 20px;
 }
 
-.titlebar__title h6 {
-  font-weight: bold;
-  margin: 0px;
+.titlebar__icon {
+  width: 45px;
+  height: 45px;
 }
 
 .titlebar__controls {
