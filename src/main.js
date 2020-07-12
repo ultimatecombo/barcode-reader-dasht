@@ -90,7 +90,7 @@ ipcMain.on("db-query-item", (event, args) => {
           else event.sender.send("db-query-result", result);
         }
       );
-    });
+    }).catch(error => handleError(error));
   } catch (error) {
     handleError(error);
   }
