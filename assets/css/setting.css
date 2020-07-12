@@ -4,9 +4,23 @@ body {
 }
 
 .wrapper {
-    grid-template-rows: 50px calc(100% - 50px);
+  grid-template-rows: 50px calc(100% - 50px);
 }
 
 .main {
-    padding: 20px;
+  padding: 20px;
+}
+
+#server {
+  direction: ltr;
+  font-family: serif !important;
+}
+
+#server-label {
+  left: inherit;
+  right: 0.75rem;
+}
+
+#connect {
+  margin-right: 25px;
 }
