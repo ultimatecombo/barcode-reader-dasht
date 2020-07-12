@@ -138,6 +138,7 @@ function initLocalStorage() {
         usbDevName: "",
         usbDevVendorID: "",
         usbDevProductID: "",
+        serverName: "",
         databaseName: "",
         storeName: "",
         columns: [],
