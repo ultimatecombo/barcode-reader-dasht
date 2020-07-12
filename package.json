@@ -7,7 +7,6 @@
     "start": "electron .",
     "rebuild-linux": "$(npm bin)/electron-rebuild",
     "rebuild-win": "./node_modules/.bin/electron-rebuild.cmd",
-    "pack": "electron-builder --dir",
     "dist": "electron-builder",
     "postinstall": "electron-builder install-app-deps"
   },
