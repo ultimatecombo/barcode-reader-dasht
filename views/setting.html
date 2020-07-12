@@ -33,11 +33,9 @@
       <div class="main">
         <div class="row">
           <!-- Store Name -->
-          <div class="col s12">
-            <div class="input-field col s12">
-              <input id="storeName" type="text" />
-              <label for="storeName">نام فروشگاه</label>
-            </div>
+          <div class="input-field col s12">
+            <input id="storeName" type="text" />
+            <label for="storeName">نام فروشگاه</label>
           </div>
 
           <!-- usb barcode reader -->
@@ -48,6 +46,17 @@
               >
             </select>
             <label>بارکدخوان</label>
+          </div>
+
+          <!-- database -->
+          <div class="col s12">
+            <div class="input-field inline rtl">
+              <input id="server" type="text" />
+              <label id="server-label" for="server">سرور</label>
+            </div>
+            <button id="connect" class="btn waves-effect waves-light">
+              اتصال
+            </button>
           </div>
 
           <!-- database -->

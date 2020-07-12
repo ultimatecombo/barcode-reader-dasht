@@ -8,8 +8,10 @@ const ipcRenderer = require("electron").ipcRenderer,
   currWin = remote.getCurrentWindow(),
   storeElm = document.getElementById("storeName"),
   usbElm = document.getElementById("usbDevice"),
+  serverElm = document.getElementById("server"),
   dbElm = document.getElementById("database"),
   colElm = document.getElementById("columns"),
+  connectBtn = document.getElementById("connect"),
   saveBtn = document.getElementById("saveBtn"),
   closeBtn = document.getElementById("closeBtn");
 
@@ -17,11 +19,36 @@ currWin.webContents.openDevTools();
 
 initSettings();
 
+// connect to server and get databases list
+connectBtn.addEventListener("click", () => {
+  let settings = JSON.parse(storage.getItem("settings"));
+
+  // detch databases, fill selectbox
+  fetchDatabases(serverElm.value)
+    .then((data) => {
+      // fill selectbox
+      console.log(data);
+      let list = data.recordset;
+      databases = list.slice();
+      dbElm.disabled = false;
+      list.forEach((db) => {
+        let opt = document.createElement("option");
+        let currOpt = settings.databaseName;
+        opt.value = db.name;
+        opt.innerHTML = db.name;
+        if (db.name == currOpt) opt.selected = true;
+        dbElm.appendChild(opt);
+      });
+      mcss.FormSelect.init(document.querySelectorAll("select"))
+    });
+});
+
 // save user settings in locale storage
 saveBtn.addEventListener("click", () => saveSettings());
 
 // close setting window
 closeBtn.addEventListener("click", () => currWin.close());
+
 
 function fetchUsbDevices() {
   return new Promise((resolve, reject) => {
@@ -30,9 +57,9 @@ function fetchUsbDevices() {
   });
 }
 
-function fetchDatabases() {
+function fetchDatabases(server) {
   return new Promise((resolve, reject) => {
-    ipcRenderer.send("db-get-list");
+    ipcRenderer.send("db-get-list", server);
     ipcRenderer.on("db-list", (event, args) => resolve(args));
   });
 }
@@ -44,9 +71,10 @@ function initSettings() {
         itemBarcode: "بارکد",
         itemDesc: "توضیحات",
       };
-
-    // set store name
+      
     storeElm.value = settings.storeName;
+    serverElm.value = settings.serverName;
+    dbElm.disabled = false;
 
     // set columns
     Object.keys(columnOptions).forEach((key) => {
@@ -57,49 +85,49 @@ function initSettings() {
       colElm.appendChild(opt);
     });
 
-    // detch databases, fill selectbox
-    let p1 = fetchDatabases().then((data) => {
-      // fill selectbox
-      console.log(data);
-      let list = data.recordset;
-      databases = list.slice();
-      list.forEach((db) => {
-        let opt = document.createElement("option");
-        let currOpt = settings.databaseName;
-        opt.value = db.name;
-        opt.innerHTML = db.name;
-        if (db.name == currOpt) opt.selected = true;
-        dbElm.appendChild(opt);
+    let p1, p2;
+    p1 = fetchUsbDevices()
+      .then((data) => {
+        console.log(data);
+        // remove redundent elements
+        let ids = [...new Set(data.map((d) => d.productId))];
+        let currDeviceId = settings.usbDevProductID;
+        usbDevices = data.slice();
+
+        ids.forEach((id) => {
+          let device = data.find((d) => d.productId === id);
+          let opt = document.createElement("option");
+          opt.value = id;
+          opt.innerHTML = `${device.product}-${id}`;
+          if (id == currDeviceId) opt.selected = true;
+          usbElm.appendChild(opt);
+        });
       });
+
+    if (settings.serverName) {
+      p2 = fetchDatabases(serverElm.value).then((data) => {
+        // fill selectbox
+        console.log(data);
+        let list = data.recordset;
+        databases = list.slice();
+        dbElm.disabled = false;
+        list.forEach((db) => {
+          let opt = document.createElement("option");
+          let currOpt = settings.databaseName;
+          opt.value = db.name;
+          opt.innerHTML = db.name;
+          if (db.name == currOpt) opt.selected = true;
+          dbElm.appendChild(opt);
+        });
+      });
+    } else {
+      p2 = Promise.resolve();
+      dbElm.disabled = true;
+    }    
+
+    Promise.all([p1, p2]).then(() => {
+      mcss.FormSelect.init(document.querySelectorAll("select"));
     });
-
-    // fetch usb devices, fill selectbox
-    let p2 = fetchUsbDevices().then((data) => {
-      console.log(data);
-      // remove redundent elements
-      let ids = [...new Set(data.map((d) => d.productId))];
-      let currDeviceId = settings.usbDevProductID;
-      usbDevices = data.slice();
-
-      ids.forEach((id) => {
-        let device = data.find((d) => d.productId === id);
-        let opt = document.createElement("option");
-        opt.value = id;
-        opt.innerHTML = `${device.product}-${id}`;
-        if (id == currDeviceId) opt.selected = true;
-        usbElm.appendChild(opt);
-      });
-    });
-
-    Promise.all([p1, p2])
-      .then(() => {
-        // stop loading screen
-        // init select boxes
-        mcss.FormSelect.init(document.querySelectorAll("select"));
-      })
-      .catch((error) => {
-        ipcRenderer.send("error-report", error);
-      });
   } catch (error) {
     ipcRenderer.send("error-report", error);
   }
@@ -133,6 +161,7 @@ function saveSettings() {
         usbDevName: br ? br.product : "",
         usbDevVendorID: br ? br.vendorId : "",
         usbDevProductID: br ? br.productId : "",
+        serverName: serverElm.value,
         databaseName: db ? db.name : "",
         storeName: storeElm.value,
         columns: mcss.FormSelect.getInstance(colElm).getSelectedValues(),

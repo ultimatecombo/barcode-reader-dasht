@@ -98,7 +98,7 @@ function initWindow() {
   settingsBtn.addEventListener("click", () => {
     let settingsWin = new BrowserWindow({
       width: 500,
-      height: 630,
+      height: 700,
       frame: false,
       parent: currWin,
       resizable: false,
@@ -158,9 +158,14 @@ function loadSettings() {
       userSettings.storeName ? " - " + userSettings.storeName : ""
     }`;
 
-    if (userSettings.databaseName) {
-      ipcRenderer.send("db-create-connection", userSettings.databaseName);
+    if (userSettings.serverName && userSettings.databaseName) {
+      ipcRenderer.send("db-create-connection", {
+        server: userSettings.serverName,
+        database: userSettings.databaseName,
+      });
       ipcRenderer.send("db-connection-test");
+    } else {
+      databaseStat.classList.replace("connected", "disconnected");
     }
 
     if (userSettings.usbDevVendorID && userSettings.usbDevProductID) {
@@ -168,6 +173,8 @@ function loadSettings() {
         vendorId: userSettings.usbDevVendorID,
         productId: userSettings.usbDevProductID,
       });
+    } else {
+      scannerStat.classList.replace("connected", "disconnected");
     }
 
     if (userSettings.columns) {
@@ -228,7 +235,7 @@ function clearCurrentInfo() {
 function showToastMessage(msg, delay = 400) {
   let id = `class-${getUID()}`;
   mcss.toast({
-    html: `<span>${msg}</span><button onclick="dismissToast('${id}')" class="btn-flat toast-action">Dismiss</button>`,
+    html: `<span>${msg}</span><button onclick="dismissToast('${id}')" class="btn-flat toast-action toast-close"><i class="fas fa-times"></i></button>`,
     classes: id,
     displayLength: delay,
   });

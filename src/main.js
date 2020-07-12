@@ -30,24 +30,29 @@ ipcMain.on("scanner-create", (event, args) => {
   event.sender.send("scanner-create-result", result);
 });
 
-ipcMain.on("db-get-list", (event) => {
+ipcMain.on("db-get-list", (event, server) => {
   try {
     let pool = new sql.ConnectionPool({
-      server: `${os.hostname()}\\SQLEXPRESS`,
+      server: server,
       driver: "msnodesqlv8",
       options: {
         trustedConnection: true,
       },
     });
 
-    pool.connect().then(() => {
-      pool
-        .request()
-        .query("SELECT name FROM MASTER.sys.databases", (error, result) => {
-          if (error) handleError(error);
-          else event.sender.send("db-list", result);
-        });
-    });
+    pool
+      .connect()
+      .then(() => {
+        pool
+          .request()
+          .query("SELECT name FROM MASTER.sys.databases", (error, result) => {
+            if (error) handleError(error);
+            else event.sender.send("db-list", result);
+          });
+      })
+      .catch((error) => {
+        handleError(error);
+      });
   } catch (error) {
     handleError(error);
   }
@@ -97,11 +102,11 @@ ipcMain.on("db-connection-test", (event) => {
   }
 });
 
-ipcMain.on("db-create-connection", (event, dbName) => {
+ipcMain.on("db-create-connection", (event, args) => {
   try {
-    let config = {
-      database: dbName,
-      server: `${os.hostname()}\\SQLEXPRESS`,
+    let config = {      
+      server: args.server,
+      database: args.database,
       driver: "msnodesqlv8",
       options: {
         trustedConnection: true,
