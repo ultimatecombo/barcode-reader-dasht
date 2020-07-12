@@ -1,4 +1,3 @@
-const os = require("os");
 const sql = require("mssql/msnodesqlv8");
 const { app, ipcMain, BrowserWindow } = require("electron");
 const { UsbScanner, getDevices } = require("usb-barcode-scanner");
@@ -8,7 +7,18 @@ let mainWindow = null,
   dbConnection = null;
 
 app.whenReady().then(createWindow);
-app.on("window-all-closed", app.quit);
+app.on("window-all-closed", () => {
+  if (scanner) {
+    scannerStop();
+    scanner = null;
+  }
+
+  if (dbConnection) {
+    dbConnection.close();
+  }
+
+  app.quit();
+});
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
@@ -104,7 +114,7 @@ ipcMain.on("db-connection-test", (event) => {
 
 ipcMain.on("db-create-connection", (event, args) => {
   try {
-    let config = {      
+    let config = {
       server: args.server,
       database: args.database,
       driver: "msnodesqlv8",
