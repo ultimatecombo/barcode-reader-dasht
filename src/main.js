@@ -58,6 +58,7 @@ ipcMain.on("db-get-list", (event, server) => {
           .query("SELECT name FROM MASTER.sys.databases", (error, result) => {
             if (error) handleError(error);
             else event.sender.send("db-list", result);
+            pool.close();
           });
       })
       .catch((error) => {
