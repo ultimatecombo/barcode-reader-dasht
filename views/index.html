@@ -20,7 +20,7 @@
     <div class="wrapper">
       <!-- titlebar -->
       <div class="titlebar">
-        <img class="titlebar__icon" src="../assets/icons/icon-512.png">
+        <img class="titlebar__icon" src="../assets/icons/icon-512.png" />
         <div id="titlebar__title" class="titlebar__title">
           استعلام قیمت
         </div>
@@ -127,10 +127,7 @@
                   قیمت کالا:
                 </div>
                 <div class="item-price__price">
-                  <div id="itemPrice" class="item-price__value"></div>
-                  <div class="item-price__unit">
-                    ریال
-                  </div>
+                  <div id="itemPrice" class="item-price__value">--</div>
                 </div>
               </div>
             </div>
@@ -142,12 +139,6 @@
       <div class="statusbar">
         <div id="statusMsg" class="statusbar__msg"></div>
         <div class="statusbar__icons">
-          <i
-            id="scannerStatus"
-            class="fas fa-cash-register tooltipped disconnected"
-            data-position="top"
-            data-tooltip="اتصال بارکدخوان"
-          ></i>
           <i
             id="databaseStatus"
             class="fas fa-database tooltipped disconnected"
