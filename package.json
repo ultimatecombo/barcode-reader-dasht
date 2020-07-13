@@ -12,7 +12,7 @@
   },
   "build": {
     "appId": "com.electron.${name}",
-    "productName": "Dasht Price Checker",
+    "productName": "Price Checker",
     "copyright": "Copyright © 2020 ${author}",
     "files": [
       "**/*",
