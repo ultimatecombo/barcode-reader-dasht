@@ -36,47 +36,45 @@ body {
   background-color: #ffeb3b;
   color: #2196f3;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: 15px;
+  margin-bottom: 0px;
 }
 
 .item-price {
   display: flex;
   flex-direction: column;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #cddc39;
 }
 
 .item-price__title {
   text-align: center;
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: bold;
 }
 
 .item-price__price {
-  font-size: 2rem;
-  font-weight: bold;
   display: flex;
+  font-size: 2.5rem;
+  font-weight: bold;
   align-items: center;
 }
 
 .item-price__value {
   flex-grow: 1;
-  text-align: left;
+  text-align: center;
   padding: 0px 20px;
-}
-
-.item-price__unit {
-  flex-grow: 1;
-  text-align: right;
-  padding: 0px 20px;
-}
-
-@media (min-width: 768px) {
-  
 }
 
 @media (min-width: 992px) {
   html,
   body {
     font-size: var(--font-size-medium) !important;
+  }
+
+  .item-details__info {    
+    margin-bottom: 30px;
   }
 
   .item-price {
@@ -98,6 +96,10 @@ body {
     font-size: var(--font-size-large) !important;
   }
 
+  .item-details__info {    
+    margin-bottom: 30px;
+  }
+
   .item-price {
     padding: 100px 0px;
   }
@@ -105,7 +107,7 @@ body {
   .item-price__title {
     font-size: 3rem;
   }
-  
+
   .item-price__price {
     font-size: 2.5rem;
   }
