@@ -2,7 +2,9 @@ const _ = require("lodash");
 const remote = require("electron").remote;
 const { ipcRenderer } = require("electron");
 const { BrowserWindow } = require("electron").remote;
+const onscan = require("onscan.js");
 
+const PRICE_UNIT = 'ریال';
 const currWin = remote.getCurrentWindow(),
   storage = window.localStorage,
   mcss = require("materialize-css"),
@@ -16,20 +18,11 @@ const currWin = remote.getCurrentWindow(),
   minimizeBtn = document.getElementById("minimizeBtn"),
   maximizeBtn = document.getElementById("maximizeBtn"),
   closeBtn = document.getElementById("closeBtn"),
-  scannerStat = document.getElementById("scannerStatus"),
-  databaseStat = document.getElementById("databaseStatus"),
-  statusMsgElm = document.getElementById("statusMsg");
+  databaseStat = document.getElementById("databaseStatus");
 
 initWindow();
 
-ipcRenderer.on("scanner-data", (event, data) => {
-  console.log(`scanned: ${data}`);
-  searchbox.value = data;
-  searchbox.dispatchEvent(new Event("change"));
-});
-
 ipcRenderer.on("db-query-result", (event, args) => {
-  console.log(args);
   if (args.recordset.length > 0) showQueryResult(args.recordset[0]);
   else clearCurrentInfo();
 });
@@ -40,16 +33,6 @@ ipcRenderer.on("db-test-result", (event, result) => {
     databaseStat.classList.replace("disconnected", "connected");
   } else {
     databaseStat.classList.replace("connected", "disconnected");
-  }
-});
-
-ipcRenderer.on("scanner-create-result", (event, result) => {
-  console.log(`scanner: ${result}`);
-  if (result) {
-    ipcRenderer.send("scanner-start");
-    scannerStat.classList.replace("disconnected", "connected");
-  } else {
-    scannerStat.classList.replace("connected", "disconnected");
   }
 });
 
@@ -75,12 +58,24 @@ function initWindow() {
   });
   searchbox.addEventListener(
     "keydown",
-    _.debounce(() => queryItem(searchbox.value), 1000)
+    _.debounce(() => {
+      console.log("keydown");
+      queryItem(searchbox.value);
+    }, 1000)
   );
-  searchbox.addEventListener(
-    "change",
-    _.debounce(() => queryItem(searchbox.value), 1000)
-  );
+
+  onscan.attachTo(document, {
+    timeBeforeScanTest: 200, // wait for the next character for upto 200ms
+    startChar: [120], // Prefix character for the cabled scanner (OPL6845R)
+    endChar: [13], // be sure the scan is complete if key 13 (enter) is detected
+    avgTimeByChar: 40, // it's not a barcode if a character takes longer than 40ms
+    reactToPaste: true
+  });
+  document.addEventListener("scan", (e) => {
+    console.log(`barcode: ${e.detail.scanCode}`);
+    searchbox.value = e.detail.scanCode;
+    queryItem(e.detail.scanCode);
+  });
 
   // init help tooltips
   mcss.Tooltip.init(document.querySelectorAll(".tooltipped"));
@@ -94,7 +89,7 @@ function initWindow() {
   settingsBtn.addEventListener("click", () => {
     let settingsWin = new BrowserWindow({
       width: 500,
-      height: 700,
+      height: 620,
       frame: false,
       parent: currWin,
       resizable: false,
@@ -131,9 +126,6 @@ function initLocalStorage() {
     storage.setItem(
       "settings",
       JSON.stringify({
-        usbDevName: "",
-        usbDevVendorID: "",
-        usbDevProductID: "",
         serverName: "",
         databaseName: "",
         storeName: "",
@@ -163,15 +155,6 @@ function loadSettings() {
       ipcRenderer.send("db-connection-test");
     } else {
       databaseStat.classList.replace("connected", "disconnected");
-    }
-
-    if (userSettings.usbDevVendorID && userSettings.usbDevProductID) {
-      ipcRenderer.send("scanner-create", {
-        vendorId: userSettings.usbDevVendorID,
-        productId: userSettings.usbDevProductID,
-      });
-    } else {
-      scannerStat.classList.replace("connected", "disconnected");
     }
 
     if (userSettings.columns) {
@@ -214,8 +197,13 @@ function showQueryResult(item) {
   // show item name, barcode, desc and price
   itemNameElm.value = item.ItemName;
   itemBarcodeElm.value = item.ItemBarCode;
-  itemDescElm.value = item.ItemTitle;
-  itemPriceElm.innerHTML = seperateWith(`${item.Price1}`);
+  itemDescElm.value = item.ItemDesc;
+  itemPriceElm.innerHTML =
+    item.DefaultPrice > 0 &&
+    item.DefaultPrice != null &&
+    item.DefaultPrice != undefined
+      ? `${seperateWith(`${item.DefaultPrice}`)}  ${PRICE_UNIT}` 
+      : "تعریف نشده";
   mcss.updateTextFields();
   mcss.textareaAutoResize(itemDescElm);
 }
@@ -225,7 +213,7 @@ function clearCurrentInfo() {
   itemNameElm.value = "";
   itemBarcodeElm.value = "";
   itemDescElm.value = "";
-  itemPriceElm.innerHTML = "";
+  itemPriceElm.innerHTML = "--";
   mcss.updateTextFields();
 }
 
