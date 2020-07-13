@@ -1,43 +1,18 @@
 const sql = require("mssql/msnodesqlv8");
 const { app, ipcMain, BrowserWindow } = require("electron");
-const { UsbScanner, getDevices } = require("usb-barcode-scanner");
 
 let mainWindow = null,
-  scanner = null,
   dbConnection = null;
 
 app.whenReady().then(createWindow);
 app.on("window-all-closed", () => {
-  if (scanner) {
-    scannerStop();
-    scanner = null;
-  }
-
   if (dbConnection) {
     dbConnection.close();
   }
-
   app.quit();
 });
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
-});
-
-// get connected usb devices list
-ipcMain.on("usb-get-list", (event) => {
-  try {
-    let list = getDevices();
-    event.sender.send("usb-list", list);
-  } catch (error) {
-    handleError(error);
-  }
-});
-
-ipcMain.on("scanner-start", () => scannerStart());
-ipcMain.on("scanner-stop", () => scannerStop());
-ipcMain.on("scanner-create", (event, args) => {
-  let result = createUsbScanner(args.vendorId, args.productId);
-  event.sender.send("scanner-create-result", result);
 });
 
 ipcMain.on("db-get-list", (event, server) => {
@@ -71,26 +46,28 @@ ipcMain.on("db-get-list", (event, server) => {
 
 ipcMain.on("db-query-item", (event, args) => {
   try {
-    dbConnection.connect().then(() => {
-      dbConnection.request().query(
-        `
+    dbConnection
+      .connect()
+      .then(() => {
+        dbConnection.request().query(
+          `
           SELECT CASE
-          WHEN ItemBarCode IS NULL AND ItemIranCode IS NULL THEN ItemCode+' '+ItemTitle
-          WHEN ItemBarCode IS NULL AND ItemIranCode IS NOT NULL THEN ItemCode+' - '+ItemIranCode+' - '+ItemTitle
-          WHEN ItemBarCode IS NOT NULL AND ItemIranCode IS NULL THEN ItemCode+' - '+ItemBarCode+' - '+ItemTitle
-          WHEN ItemBarCode IS NOT NULL AND ItemIranCode IS NOT NULL THEN ItemCode+' - '+ItemBarCode+' - '+ItemIranCode+' - '+ItemTitle
-          ELSE '' END ForSearch,'هر '+UnitTitle+'، '+ItemTitle ItemName
-          ,ItemCode,ItemBarCode,ItemIranCode,ItemTitle,UnitTitle,DefaultPrice,Price1,
-          CASE WHEN Price1-DefaultPrice >0 THEN Price1-DefaultPrice ELSE 0 END Dicount
+          WHEN ItemBarCode IS NULL AND ItemIranCode IS NULL THEN ItemCode
+          WHEN ItemBarCode IS NULL AND ItemIranCode IS NOT NULL THEN ItemCode + ' - ' + ItemIranCode
+          WHEN ItemBarCode IS NOT NULL AND ItemIranCode IS NULL THEN ItemCode + ' - ' + ItemBarCode
+          WHEN ItemBarCode IS NOT NULL AND ItemIranCode IS NOT NULL THEN ItemCode + ' - ' + ItemBarCode + ' - ' + ItemIranCode
+          ELSE '' END ForSearch, 'هر ' + UnitTitle + '، ' + ItemTitle ItemName, ItemBarCode, ISNULL(DefaultPrice, 0) DefaultPrice, ISNULL(item.[Description], '') ItemDesc
           FROM POS.vwItemSalePrice
+          LEFT JOIN POS.Item item ON item.ItemID = ItemRef
           WHERE ItemSubUnitRef IS NULL AND 
           (ItemBarCode LIKE '${args}' OR itemIranCode LIKE '${args}' OR ItemTitle LIKE '${args}') `,
-        (error, result) => {
-          if (error) handleError(error);
-          else event.sender.send("db-query-result", result);
-        }
-      );
-    }).catch(error => handleError(error));
+          (error, result) => {
+            if (error) handleError(error);
+            else event.sender.send("db-query-result", result);
+          }
+        );
+      })
+      .catch((error) => handleError(error));
   } catch (error) {
     handleError(error);
   }
@@ -151,40 +128,6 @@ function createWindow() {
 
   mainWindow.loadFile("./views/index.html");
   mainWindow.webContents.openDevTools();
-}
-
-function createUsbScanner(vendorId, productId) {
-  try {
-    scanner = new UsbScanner({
-      vendorId: vendorId,
-      productId: productId,
-    });
-
-    scanner.on("data", (data) => {
-      mainWindow.webContents.send("scanner-data", data);
-    });
-
-    return true;
-  } catch (error) {
-    handleError(error);
-    return false;
-  }
-}
-
-function scannerStart() {
-  try {
-    scanner.startScanning();
-  } catch (error) {
-    handleError(error);
-  }
-}
-
-function scannerStop() {
-  try {
-    scanner.stopScanning();
-  } catch (error) {
-    handleError(error);
-  }
 }
 
 function createConnectionPool(config) {
