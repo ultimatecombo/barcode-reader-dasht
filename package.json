@@ -26,12 +26,12 @@
   "keywords": [],
   "author": "Ahmad-Fz",
   "license": "ISC",
-  "dependencies": {    
+  "dependencies": {
     "lodash": "^4.17.15",
     "materialize-css": "^1.0.0-rc.2",
-    "mssql": "^6.2.0",
     "msnodesqlv8": "^1.1.7",
-    "usb-barcode-scanner": "^1.0.2"
+    "mssql": "^6.2.0",
+    "onscan.js": "^1.5.2"
   },
   "devDependencies": {
     "electron": "^9.0.5",
