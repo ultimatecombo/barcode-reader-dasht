@@ -62,6 +62,7 @@ function initWindow() {
     endChar: [13],   
     avgTimeByChar: 40,
     reactToPaste: true,
+    minLength: 2,
     onKeyDetect: function (iKeyCode) {      
       console.log("Pressed: " + iKeyCode);
     }
@@ -105,7 +106,6 @@ function initWindow() {
     childs.forEach((c) => c.close());
     currWin.close();
   });
-  minimizeBtn.addEventListener("click", () => currWin.minimize());
   maximizeBtn.addEventListener("click", () => {
     if (currWin.isMaximized()) {
       currWin.unmaximize();
