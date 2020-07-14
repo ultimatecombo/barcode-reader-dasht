@@ -64,18 +64,13 @@ function initWindow() {
     }, 1000)
   );
 
-  onscan.attachTo(document, {
-    // wait for the next character for upto 200ms
-    timeBeforeScanTest: 200,
-    // Prefix character for the cabled scanner (OPL6845R)
-    startChar: [120],
-    // be sure the scan is complete if key 13 (enter) is detected
-    endChar: [13],
-    // it's not a barcode if a character takes longer than 40ms
+  onscan.attachTo(document, {    
+    timeBeforeScanTest: 200,    
+    startChar: [120],    
+    endChar: [13],   
     avgTimeByChar: 40,
     reactToPaste: true,
-    onKeyDetect: function (iKeyCode) {
-      // output all potentially relevant key events - great for debugging!
+    onKeyDetect: function (iKeyCode) {      
       console.log("Pressed: " + iKeyCode);
     }
   });
