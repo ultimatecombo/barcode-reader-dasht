@@ -4,7 +4,7 @@ const { ipcRenderer } = require("electron");
 const { BrowserWindow } = require("electron").remote;
 const onscan = require("onscan.js");
 
-const PRICE_UNIT = 'ریال';
+const PRICE_UNIT = "ریال";
 const currWin = remote.getCurrentWindow(),
   storage = window.localStorage,
   mcss = require("materialize-css"),
@@ -65,11 +65,19 @@ function initWindow() {
   );
 
   onscan.attachTo(document, {
-    timeBeforeScanTest: 200, // wait for the next character for upto 200ms
-    startChar: [120], // Prefix character for the cabled scanner (OPL6845R)
-    endChar: [13], // be sure the scan is complete if key 13 (enter) is detected
-    avgTimeByChar: 40, // it's not a barcode if a character takes longer than 40ms
-    reactToPaste: true
+    // wait for the next character for upto 200ms
+    timeBeforeScanTest: 200,
+    // Prefix character for the cabled scanner (OPL6845R)
+    startChar: [120],
+    // be sure the scan is complete if key 13 (enter) is detected
+    endChar: [13],
+    // it's not a barcode if a character takes longer than 40ms
+    avgTimeByChar: 40,
+    reactToPaste: true,
+    onKeyDetect: function (iKeyCode) {
+      // output all potentially relevant key events - great for debugging!
+      console.log("Pressed: " + iKeyCode);
+    }
   });
   document.addEventListener("scan", (e) => {
     console.log(`barcode: ${e.detail.scanCode}`);
@@ -202,7 +210,7 @@ function showQueryResult(item) {
     item.DefaultPrice > 0 &&
     item.DefaultPrice != null &&
     item.DefaultPrice != undefined
-      ? `${seperateWith(`${item.DefaultPrice}`)}  ${PRICE_UNIT}` 
+      ? `${seperateWith(`${item.DefaultPrice}`)}  ${PRICE_UNIT}`
       : "تعریف نشده";
   mcss.updateTextFields();
   mcss.textareaAutoResize(itemDescElm);
