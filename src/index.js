@@ -56,14 +56,7 @@ function initWindow() {
   searchbox.addEventListener("blur", () => {
     searchbox.focus();
   });
-  searchbox.addEventListener(
-    "keydown",
-    _.debounce(() => {
-      console.log("keydown");
-      queryItem(searchbox.value);
-    }, 1000)
-  );
-
+  
   onscan.attachTo(document, {    
     timeBeforeScanTest: 200,    
     startChar: [120],    
@@ -76,7 +69,7 @@ function initWindow() {
   });
   document.addEventListener("scan", (e) => {
     console.log(`barcode: ${e.detail.scanCode}`);
-    searchbox.value = e.detail.scanCode;
+    searchbox.value = "";
     queryItem(e.detail.scanCode);
   });
 
