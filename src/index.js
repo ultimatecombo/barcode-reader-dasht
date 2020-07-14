@@ -15,7 +15,6 @@ const currWin = remote.getCurrentWindow(),
   itemDescElm = document.getElementById("itemDesc"),
   itemPriceElm = document.getElementById("itemPrice"),
   settingsBtn = document.getElementById("settingsBtn"),
-  minimizeBtn = document.getElementById("minimizeBtn"),
   maximizeBtn = document.getElementById("maximizeBtn"),
   closeBtn = document.getElementById("closeBtn"),
   databaseStat = document.getElementById("databaseStatus");
