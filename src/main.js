@@ -60,7 +60,7 @@ ipcMain.on("db-query-item", (event, args) => {
           FROM POS.vwItemSalePrice
           LEFT JOIN POS.Item item ON item.ItemID = ItemRef
           WHERE ItemSubUnitRef IS NULL AND 
-          (ItemBarCode LIKE '${args}' OR itemIranCode LIKE '${args}' OR ItemTitle LIKE '${args}') `,
+          (ItemCode LIKE '${args}' OR ItemBarCode LIKE '${args}' OR itemIranCode LIKE '${args}' OR ItemTitle LIKE '${args}')`,
           (error, result) => {
             if (error) handleError(error);
             else event.sender.send("db-query-result", result);
