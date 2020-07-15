@@ -14,13 +14,9 @@
     "appId": "com.electron.${name}",
     "productName": "Price Checker",
     "copyright": "Copyright © 2020 ${author}",
-    "files": [
-      "**/*",
-      "build/icon.*"
-    ],
     "win": {
       "target": "portable",
-      "icon": "build/icon.ico"
+      "icon": "assets/icons/icon.png"
     }
   },
   "keywords": [],
