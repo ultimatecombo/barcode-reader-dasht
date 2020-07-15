@@ -6,6 +6,9 @@ const ipcRenderer = require("electron").ipcRenderer,
   mcss = require("materialize-css"),
   currWin = remote.getCurrentWindow(),
   storeElm = document.getElementById("storeName"),
+  pincodeElm = document.getElementById("pincode"),
+  dbUsernameElm = document.getElementById("dbUsername"),
+  dbPasswordElm = document.getElementById("dbPassword"),
   serverElm = document.getElementById("server"),
   dbElm = document.getElementById("database"),
   colElm = document.getElementById("columns"),
@@ -20,14 +23,19 @@ initSettings();
 // connect to server and get databases list
 connectBtn.addEventListener("click", () => {
   let settings = JSON.parse(storage.getItem("settings"));
+  let config = {
+    username: dbUsernameElm.value,
+    password: dbPasswordElm.value,
+    server: serverElm.value,
+  };
 
   // disable db list till the
   // list comes back from main
   dbElm.disabled = true;
   mcss.FormSelect.init(document.querySelectorAll("select"));
-
+  
   // detch databases, fill selectbox
-  fetchDatabases(serverElm.value).then((data) => {
+  fetchDatabases(config).then((data) => {
     // fill selectbox
     console.log(data);
     let list = data.recordset;
@@ -59,9 +67,9 @@ saveBtn.addEventListener("click", () => saveSettings());
 // close setting window
 closeBtn.addEventListener("click", () => currWin.close());
 
-function fetchDatabases(server) {
+function fetchDatabases(config) {
   return new Promise((resolve, reject) => {
-    ipcRenderer.send("db-get-list", server);
+    ipcRenderer.send("db-get-list", config);
     ipcRenderer.on("db-list", (event, args) => resolve(args));
   });
 }
@@ -75,6 +83,9 @@ function initSettings() {
       };
 
     storeElm.value = settings.storeName;
+    pincodeElm.value = settings.pincode;
+    dbUsernameElm.value = settings.dbUsername;
+    dbPasswordElm.value = settings.dbPassword;
     serverElm.value = settings.serverName;
     dbElm.disabled = false;
 
@@ -86,9 +97,13 @@ function initSettings() {
       if (settings.columns.includes(key)) opt.selected = true;
       colElm.appendChild(opt);
     });
-    
+
     if (settings.serverName) {
-      fetchDatabases(serverElm.value).then((data) => {
+      fetchDatabases({
+        username: dbUsernameElm.value,
+        password: dbPasswordElm.value,
+        server: serverElm.value,
+      }).then((data) => {
         // fill selectbox
         console.log(data);
         let list = data.recordset;
@@ -104,7 +119,7 @@ function initSettings() {
         });
         mcss.FormSelect.init(document.querySelectorAll("select"));
       });
-    } else {      
+    } else {
       dbElm.disabled = true;
     }
 
@@ -129,7 +144,10 @@ function saveSettings() {
 
     storage.setItem(
       "settings",
-      JSON.stringify({       
+      JSON.stringify({
+        pincode: pincodeElm.value,
+        dbUsername: dbUsernameElm.value,
+        dbPassword: dbPasswordElm.value,
         serverName: serverElm.value,
         databaseName: db ? db.name : "",
         storeName: storeElm.value,

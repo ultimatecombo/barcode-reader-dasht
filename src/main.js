@@ -1,44 +1,41 @@
-const sql = require("mssql/msnodesqlv8");
+const sql = require("mssql");
 const { app, ipcMain, BrowserWindow } = require("electron");
 
-let mainWindow = null,
-  dbConnection = null;
+let mainWindow = null;
+let listPool = null;
+let queryPool = null;
 
+sql.on("error", (error) => handleError(error));
 app.whenReady().then(createWindow);
 app.on("window-all-closed", () => {
-  if (dbConnection) {
-    dbConnection.close();
-  }
-  app.quit();
+  sql.close().then(() => app.quit());
 });
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
 
-ipcMain.on("db-get-list", (event, server) => {
+ipcMain.on("db-get-list", (event, args) => {
   try {
-    let pool = new sql.ConnectionPool({
-      server: server,
-      driver: "msnodesqlv8",
-      options: {
-        trustedConnection: true,
-      },
-    });
+    let config = {
+      user: args.username,
+      password: args.password,
+      server: args.server,
+      database: "master",
+      encrypt: false,
+    };
 
-    pool
+    if (!listPool) {
+      listPool.close();
+      listPool = new sql.ConnectionPool(config);
+    }
+
+    listPool
       .connect()
-      .then(() => {
-        pool
-          .request()
-          .query("SELECT name FROM MASTER.sys.databases", (error, result) => {
-            if (error) handleError(error);
-            else event.sender.send("db-list", result);
-            pool.close();
-          });
+      .then((pool) => {
+        return pool.request().query("SELECT name FROM MASTER.sys.databases");
       })
-      .catch((error) => {
-        handleError(error);
-      });
+      .then((result) => event.sender.send("db-list", result))
+      .catch((error) => handleError(error));
   } catch (error) {
     handleError(error);
   }
@@ -46,11 +43,10 @@ ipcMain.on("db-get-list", (event, server) => {
 
 ipcMain.on("db-query-item", (event, args) => {
   try {
-    dbConnection
+    queryPool
       .connect()
-      .then(() => {
-        dbConnection.request().query(
-          `
+      .then((pool) => {
+        return pool.request().query(`
           SELECT CASE
           WHEN ItemBarCode IS NULL AND ItemIranCode IS NULL THEN ItemCode
           WHEN ItemBarCode IS NULL AND ItemIranCode IS NOT NULL THEN ItemCode + ' - ' + ItemIranCode
@@ -60,48 +56,39 @@ ipcMain.on("db-query-item", (event, args) => {
           FROM POS.vwItemSalePrice
           LEFT JOIN POS.Item item ON item.ItemID = ItemRef
           WHERE ItemSubUnitRef IS NULL AND 
-          (ItemCode LIKE '${args}' OR ItemBarCode LIKE '${args}' OR itemIranCode LIKE '${args}' OR ItemTitle LIKE '${args}')`,
-          (error, result) => {
-            if (error) handleError(error);
-            else event.sender.send("db-query-result", result);
-          }
-        );
+          (ItemCode LIKE '${args}' OR ItemBarCode LIKE '${args}' OR itemIranCode LIKE '${args}' OR ItemTitle LIKE '${args}')`);
       })
+      .then((result) => event.sender.send("db-query-result", result))
       .catch((error) => handleError(error));
   } catch (error) {
     handleError(error);
   }
 });
 
-ipcMain.on("db-connection-test", (event) => {
-  try {
-    dbConnection
-      .connect()
-      .then(() => {
-        event.sender.send("db-test-result", true);
-      })
-      .catch((error) => {
-        event.sender.send("db-test-result", false);
-        handleError(error);
-      });
-  } catch (error) {
-    event.sender.send("db-test-result", false);
-    handleError(error);
-  }
-});
-
-ipcMain.on("db-create-connection", (event, args) => {
+ipcMain.on("db-connect", (event, args) => {
   try {
     let config = {
+      user: args.username,
+      password: args.password,
       server: args.server,
       database: args.database,
-      driver: "msnodesqlv8",
-      options: {
-        trustedConnection: true,
-      },
+      encrypt: false,
     };
-    dbConnection = createConnectionPool(config);
-    dbConnection.on("error", (error) => handleError(error));
+
+    if (!queryPool) {
+      queryPool.close();
+      queryPool = new sql.ConnectionPool(config);
+    }
+
+    queryPool
+      .connect()
+      .then(() => {
+        event.sender.send("db-connect-result", true);
+      })
+      .catch((error) => {
+        event.sender.send("db-connect-result", false);
+        handleError(error);
+      });
   } catch (error) {
     handleError(error);
   }
@@ -128,14 +115,6 @@ function createWindow() {
 
   mainWindow.loadFile("./views/index.html");
   mainWindow.webContents.openDevTools();
-}
-
-function createConnectionPool(config) {
-  try {
-    return new sql.ConnectionPool(config);
-  } catch (error) {
-    handleError(error);
-  }
 }
 
 function handleError(error) {

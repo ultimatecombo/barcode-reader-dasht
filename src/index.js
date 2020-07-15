@@ -1,8 +1,8 @@
 const _ = require("lodash");
+const onscan = require("onscan.js");
 const remote = require("electron").remote;
 const { ipcRenderer } = require("electron");
 const { BrowserWindow } = require("electron").remote;
-const onscan = require("onscan.js");
 
 const PRICE_UNIT = "ریال";
 const currWin = remote.getCurrentWindow(),
@@ -55,17 +55,27 @@ function initWindow() {
   searchbox.addEventListener("blur", () => {
     searchbox.focus();
   });
-  
-  onscan.attachTo(document, {    
-    timeBeforeScanTest: 200,    
-    startChar: [120],    
-    endChar: [13],   
+
+  searchbox.addEventListener(
+    "keydown",
+    _.debounce((e) => {
+      if (e.keyCode != 13) {
+        console.log("keydown");
+        queryItem(searchbox.value);
+      }
+    }, 1000)
+  );
+
+  onscan.attachTo(document, {
+    timeBeforeScanTest: 200,
+    startChar: [120],
+    endChar: [13],
     avgTimeByChar: 40,
     reactToPaste: true,
     minLength: 2,
-    onKeyDetect: function (iKeyCode) {      
+    onKeyDetect: function (iKeyCode) {
       console.log("Pressed: " + iKeyCode);
-    }
+    },
   });
   document.addEventListener("scan", (e) => {
     console.log(`barcode: ${e.detail.scanCode}`);
@@ -85,7 +95,7 @@ function initWindow() {
   settingsBtn.addEventListener("click", () => {
     let settingsWin = new BrowserWindow({
       width: 500,
-      height: 620,
+      height: 700,
       frame: false,
       parent: currWin,
       resizable: false,
@@ -121,6 +131,9 @@ function initLocalStorage() {
     storage.setItem(
       "settings",
       JSON.stringify({
+        pincode: "",
+        dbUsername: "",
+        dbPassword: "",
         serverName: "",
         databaseName: "",
         storeName: "",
@@ -143,11 +156,20 @@ function loadSettings() {
     }`;
 
     if (userSettings.serverName && userSettings.databaseName) {
-      ipcRenderer.send("db-create-connection", {
+      connectToDatabase({
+        username: userSettings.dbUsername,
+        password: userSettings.dbPassword,
         server: userSettings.serverName,
         database: userSettings.databaseName,
-      });
-      ipcRenderer.send("db-connection-test");
+      })
+        .then(() => {
+          console.log("database: true");
+          databaseStat.classList.replace("disconnected", "connected");
+        })
+        .catch(() => {
+          console.log("database: false");
+          databaseStat.classList.replace("connected", "disconnected");
+        });
     } else {
       databaseStat.classList.replace("connected", "disconnected");
     }
@@ -162,6 +184,16 @@ function loadSettings() {
   } catch (error) {
     showToastMessage(error, 600000);
   }
+}
+
+function connectToDatabase(config) {
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("db-connect", config);
+    ipcRenderer.on("db-connect-result", (event, res) => {
+      if (res) resolve();
+      else reject();
+    });
+  });
 }
 
 // seperate item price with comma
