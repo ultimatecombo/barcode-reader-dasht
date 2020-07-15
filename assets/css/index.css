@@ -50,13 +50,13 @@ body {
 
 .item-price__title {
   text-align: center;
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: bold;
 }
 
 .item-price__price {
   display: flex;
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: bold;
   align-items: center;
 }
@@ -118,11 +118,11 @@ body {
   }
 
   .item-price__title {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
 
   .item-price__price {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
 }
 
@@ -141,10 +141,10 @@ body {
   }
 
   .item-price__title {
-    font-size: 3rem;
+    font-size: 2.5rem;
   }
 
   .item-price__price {
-    font-size: 2.5rem;
+    font-size: 3rem;
   }
 }
