@@ -27,11 +27,10 @@
   "author": "Ahmad-Fz",
   "license": "ISC",
   "dependencies": {
-    "lodash": "^4.17.15",
-    "materialize-css": "^1.0.0-rc.2",
-    "msnodesqlv8": "^1.1.7",
     "mssql": "^6.2.0",
-    "onscan.js": "^1.5.2"
+    "lodash": "^4.17.15",
+    "onscan.js": "^1.5.2",
+    "materialize-css": "^1.0.0-rc.2"
   },
   "devDependencies": {
     "electron": "^9.0.5",
