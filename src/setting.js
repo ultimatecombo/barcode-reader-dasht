@@ -37,7 +37,6 @@ connectBtn.addEventListener("click", () => {
   // detch databases, fill selectbox
   fetchDatabases(config).then((data) => {
     // fill selectbox
-    console.log(data);
     let list = data.recordset;
     databases = list.slice();
     dbElm.disabled = false;
@@ -105,7 +104,6 @@ function initSettings() {
         server: serverElm.value,
       }).then((data) => {
         // fill selectbox
-        console.log(data);
         let list = data.recordset;
         databases = list.slice();
         dbElm.disabled = false;

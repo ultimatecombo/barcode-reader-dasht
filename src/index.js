@@ -26,15 +26,6 @@ ipcRenderer.on("db-query-result", (event, args) => {
   else clearCurrentInfo();
 });
 
-ipcRenderer.on("db-test-result", (event, result) => {
-  console.log(`database: ${result}`);
-  if (result) {
-    databaseStat.classList.replace("disconnected", "connected");
-  } else {
-    databaseStat.classList.replace("connected", "disconnected");
-  }
-});
-
 ipcRenderer.on("apply-settings", (event, args) => loadSettings());
 
 ipcRenderer.on("error-show", (event, error) => {
@@ -59,10 +50,7 @@ function initWindow() {
   searchbox.addEventListener(
     "keydown",
     _.debounce((e) => {
-      if (e.keyCode != 13) {
-        console.log("keydown");
-        queryItem(searchbox.value);
-      }
+      if (e.keyCode != 13) queryItem(searchbox.value);
     }, 1000)
   );
 
@@ -73,9 +61,6 @@ function initWindow() {
     avgTimeByChar: 40,
     reactToPaste: true,
     minLength: 2,
-    onKeyDetect: function (iKeyCode) {
-      console.log("Pressed: " + iKeyCode);
-    },
   });
   document.addEventListener("scan", (e) => {
     console.log(`barcode: ${e.detail.scanCode}`);
