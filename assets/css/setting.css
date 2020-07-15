@@ -24,3 +24,20 @@ body {
 #connect {
   margin-right: 25px;
 }
+
+.connectBtn {
+  display: flex;
+  align-items: center;
+}
+
+.connectBtn__text {
+  flex-grow: 1;
+}
+
+.connectBtn__spinner {
+  position: absolute;
+  left: 15px;
+  width: 20px !important;
+  height: 20px !important;
+  flex-grow: 0;
+}

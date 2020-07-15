@@ -33,6 +33,8 @@ connectBtn.addEventListener("click", () => {
   // list comes back from main
   dbElm.disabled = true;
   mcss.FormSelect.init(document.querySelectorAll("select"));
+
+  document.querySelector(".connectBtn__spinner").classList.add("active");
   
   // detch databases, fill selectbox
   fetchDatabases(config).then((data) => {
@@ -40,6 +42,7 @@ connectBtn.addEventListener("click", () => {
     let list = data.recordset;
     databases = list.slice();
     dbElm.disabled = false;
+    document.querySelector(".connectBtn__spinner").classList.remove("active");
 
     // remove current list
     [...dbElm.children].forEach((n) => {
