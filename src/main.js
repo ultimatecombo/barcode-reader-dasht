@@ -24,11 +24,8 @@ ipcMain.on("db-get-list", (event, args) => {
       encrypt: false,
     };
 
-    if (!listPool) {
-      listPool.close();
-      listPool = new sql.ConnectionPool(config);
-    }
-
+    if (listPool) listPool.close();
+    listPool = new sql.ConnectionPool(config);
     listPool
       .connect()
       .then((pool) => {
@@ -75,11 +72,8 @@ ipcMain.on("db-connect", (event, args) => {
       encrypt: false,
     };
 
-    if (!queryPool) {
-      queryPool.close();
-      queryPool = new sql.ConnectionPool(config);
-    }
-
+    if (queryPool) queryPool.close();
+    queryPool = new sql.ConnectionPool(config);
     queryPool
       .connect()
       .then(() => {
