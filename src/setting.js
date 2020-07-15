@@ -29,38 +29,52 @@ connectBtn.addEventListener("click", () => {
     server: serverElm.value,
   };
 
+  serverElm.classList.remove("valid");
+  serverElm.classList.remove("invalid");
+
   // disable db list till the
   // list comes back from main
   dbElm.disabled = true;
   mcss.FormSelect.init(document.querySelectorAll("select"));
 
   document.querySelector(".connectBtn__spinner").classList.add("active");
-  
+
   // detch databases, fill selectbox
-  fetchDatabases(config).then((data) => {
-    // fill selectbox
-    let list = data.recordset;
-    databases = list.slice();
-    dbElm.disabled = false;
-    document.querySelector(".connectBtn__spinner").classList.remove("active");
+  fetchDatabases(config)
+    .then((data) => {
+      // fill selectbox
+      let list = data.recordset;
 
-    // remove current list
-    [...dbElm.children].forEach((n) => {
-      if (!n.disabled) n.remove();
-      else n.selected = true;
-    });
+      serverElm.classList.add("valid");
+      serverElm.classList.remove("invalid");
 
-    // add new list
-    list.forEach((db) => {
-      let opt = document.createElement("option");
-      let currOpt = settings.databaseName;
-      opt.value = db.name;
-      opt.innerHTML = db.name;
-      if (db.name == currOpt) opt.selected = true;
-      dbElm.appendChild(opt);
+      databases = list.slice();
+      dbElm.disabled = false;
+
+      // remove current list
+      [...dbElm.children].forEach((n) => {
+        if (!n.disabled) n.remove();
+        else n.selected = true;
+      });
+
+      // add new list
+      list.forEach((db) => {
+        let opt = document.createElement("option");
+        let currOpt = settings.databaseName;
+        opt.value = db.name;
+        opt.innerHTML = db.name;
+        if (db.name == currOpt) opt.selected = true;
+        dbElm.appendChild(opt);
+      });
+      mcss.FormSelect.init(document.querySelectorAll("select"));
+    })
+    .catch(() => {
+      serverElm.classList.add("invalid");
+      serverElm.classList.remove("valid");
+    })
+    .finally(() => {
+      document.querySelector(".connectBtn__spinner").classList.remove("active");
     });
-    mcss.FormSelect.init(document.querySelectorAll("select"));
-  });
 });
 
 // save user settings in locale storage
@@ -72,7 +86,10 @@ closeBtn.addEventListener("click", () => currWin.close());
 function fetchDatabases(config) {
   return new Promise((resolve, reject) => {
     ipcRenderer.send("db-get-list", config);
-    ipcRenderer.on("db-list", (event, args) => resolve(args));
+    ipcRenderer.on("db-list-result", (event, result) => {
+      if (result) resolve(result);
+      else reject();
+    });
   });
 }
 
@@ -105,21 +122,30 @@ function initSettings() {
         username: dbUsernameElm.value,
         password: dbPasswordElm.value,
         server: serverElm.value,
-      }).then((data) => {
-        // fill selectbox
-        let list = data.recordset;
-        databases = list.slice();
-        dbElm.disabled = false;
-        list.forEach((db) => {
-          let opt = document.createElement("option");
-          let currOpt = settings.databaseName;
-          opt.value = db.name;
-          opt.innerHTML = db.name;
-          if (db.name == currOpt) opt.selected = true;
-          dbElm.appendChild(opt);
+      })
+        .then((data) => {
+          // fill selectbox
+          let list = data.recordset;
+          databases = list.slice();
+          dbElm.disabled = false;
+
+          serverElm.classList.add("valid");
+          serverElm.classList.remove("invalid");
+
+          list.forEach((db) => {
+            let opt = document.createElement("option");
+            let currOpt = settings.databaseName;
+            opt.value = db.name;
+            opt.innerHTML = db.name;
+            if (db.name == currOpt) opt.selected = true;
+            dbElm.appendChild(opt);
+          });
+          mcss.FormSelect.init(document.querySelectorAll("select"));
+        })
+        .catch(() => {
+          serverElm.classList.add("invalid");
+          serverElm.classList.remove("valid");
         });
-        mcss.FormSelect.init(document.querySelectorAll("select"));
-      });
     } else {
       dbElm.disabled = true;
     }

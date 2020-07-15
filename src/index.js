@@ -9,6 +9,8 @@ const currWin = remote.getCurrentWindow(),
   storage = window.localStorage,
   mcss = require("materialize-css"),
   searchbox = document.getElementById("searchbox"),
+  pincodeModal = document.getElementById("pincodeModal"),
+  pincodeModalPin = document.getElementById("pincodeModal__pin"),
   devtoolsBtn = document.getElementById("devtoolsBtn"),
   itemNameElm = document.getElementById("itemName"),
   itemBarcodeElm = document.getElementById("itemBarcode"),
@@ -36,7 +38,7 @@ ipcRenderer.on("error-show", (event, error) => {
 
 function initWindow() {
   initLocalStorage();
-  loadSettings();
+  let settings = loadSettings();
 
   // main window is maximized by default
   currWin.maximize();
@@ -44,7 +46,8 @@ function initWindow() {
   // always keep the focus on searchbox
   searchbox.focus();
   searchbox.addEventListener("blur", () => {
-    searchbox.focus();
+    let modal = mcss.Modal.getInstance(pincodeModal);
+    if (!modal.isOpen) searchbox.focus();
   });
 
   searchbox.addEventListener(
@@ -70,6 +73,14 @@ function initWindow() {
 
   // init help tooltips
   mcss.Tooltip.init(document.querySelectorAll(".tooltipped"));
+  // init modals
+  mcss.Modal.init(document.querySelectorAll(".modal"), {
+    onOpenEnd: () => pincodeModalPin.focus(),
+    onCloseEnd: () => {
+      searchbox.focus();
+      pincodeModalPin.value = "";
+    },
+  });
 
   // init window buttons
   devtoolsBtn.addEventListener("click", () => {
@@ -80,10 +91,11 @@ function initWindow() {
   settingsBtn.addEventListener("click", () => {
     let settingsWin = new BrowserWindow({
       width: 500,
-      height: 700,
+      height: 730,
       frame: false,
+      show: false,
       parent: currWin,
-      resizable: false,
+      resizable: false,      
       webPreferences: {
         nodeIntegration: true,
       },
@@ -91,15 +103,16 @@ function initWindow() {
 
     settingsWin.on("close", () => {
       settingsWin = null;
+      console.log(document.getElementById("window-cover"));
+      document.getElementById("window-cover").classList.remove("active");
       currWin.focus();
     });
-    settingsWin.on("ready-to-show", () => settingsWin.show());
+    settingsWin.on("ready-to-show", () => {
+      console.log(document.getElementById("window-cover"));
+      document.getElementById("window-cover").classList.add("active");
+      settingsWin.show();
+    });
     settingsWin.loadFile("./views/setting.html");
-  });
-  closeBtn.addEventListener("click", () => {
-    let childs = currWin.getChildWindows();
-    childs.forEach((c) => c.close());
-    currWin.close();
   });
   maximizeBtn.addEventListener("click", () => {
     if (currWin.isMaximized()) {
@@ -107,6 +120,17 @@ function initWindow() {
     } else {
       currWin.maximize();
     }
+  });
+  closeBtn.addEventListener("click", () => {
+    getUserPin()
+      .then((pin) => {
+        if (pin === settings.pincode) {
+          let childs = currWin.getChildWindows();
+          childs.forEach((c) => c.close());
+          currWin.close();
+        }
+      })
+      .catch(() => {});
   });
 }
 
@@ -148,11 +172,9 @@ function loadSettings() {
         database: userSettings.databaseName,
       })
         .then(() => {
-          console.log("database: true");
           databaseStat.classList.replace("disconnected", "connected");
         })
         .catch(() => {
-          console.log("database: false");
           databaseStat.classList.replace("connected", "disconnected");
         });
     } else {
@@ -166,6 +188,8 @@ function loadSettings() {
         else elm.style.display = "none";
       });
     }
+
+    return userSettings;
   } catch (error) {
     showToastMessage(error, 600000);
   }
@@ -246,4 +270,32 @@ function dismissToast(id) {
 
 function getUID() {
   return Math.floor(Math.random() * 1000000000).toString(16);
+}
+
+function getUserPin() {
+  document
+    .getElementById("pincodeModal__ok")
+    .replaceWith(document.getElementById("pincodeModal__ok").cloneNode(true));
+  document
+    .getElementById("pincodeModal__cancel")
+    .replaceWith(
+      document.getElementById("pincodeModal__cancel").cloneNode(true)
+    );
+
+  let pincodeModalOk = document.getElementById("pincodeModal__ok");
+  let pincodeModalCancel = document.getElementById("pincodeModal__cancel");
+
+  return new Promise((resolve, reject) => {
+    let modal = mcss.Modal.getInstance(pincodeModal);
+    modal.open();
+
+    pincodeModalOk.addEventListener("click", () => {
+      resolve(pincodeModalPin.value);
+      modal.close();
+    });
+    pincodeModalCancel.addEventListener("click", () => {
+      reject();
+      modal.close();
+    });
+  });
 }

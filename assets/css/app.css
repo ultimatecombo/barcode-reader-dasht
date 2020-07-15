@@ -27,6 +27,10 @@ body {
 }
 
 .btn,
+.btn-flat {
+  font-family: var(--font-family) !important;
+}
+
 label,
 input,
 textarea {
@@ -42,6 +46,11 @@ textarea {
 
 .select-wrapper .caret {
   z-index: 0;
+}
+
+.input-field .helper-text::after{
+  right: 0px !important;
+  left: auto !important;
 }
 
 .wrapper {
