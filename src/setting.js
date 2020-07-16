@@ -16,8 +16,6 @@ const ipcRenderer = require("electron").ipcRenderer,
   saveBtn = document.getElementById("saveBtn"),
   closeBtn = document.getElementById("closeBtn");
 
-currWin.webContents.openDevTools();
-
 initSettings();
 
 // connect to server and get databases list
