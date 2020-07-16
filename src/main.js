@@ -14,6 +14,10 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
 
+ipcMain.on("terminate", () => {
+  app.quit();
+});
+
 ipcMain.on("db-get-list", (event, args) => {
   try {
     let config = {

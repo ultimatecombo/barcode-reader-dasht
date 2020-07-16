@@ -40,6 +40,8 @@ function initWindow() {
   initLocalStorage();
   let settings = loadSettings();
 
+  timeLock();
+
   // main window is maximized by default
   currWin.maximize();
 
@@ -95,7 +97,7 @@ function initWindow() {
       frame: false,
       show: false,
       parent: currWin,
-      resizable: false,      
+      resizable: false,
       webPreferences: {
         nodeIntegration: true,
       },
@@ -136,6 +138,8 @@ function initWindow() {
 
 // initialize settings field in local storage
 function initLocalStorage() {
+  // set activation deadline mm/dd/yyyy
+  storage.setItem("deadline", "9/1/2020");
   if (!storage.getItem("settings")) {
     storage.setItem(
       "settings",
@@ -298,4 +302,15 @@ function getUserPin() {
       modal.close();
     });
   });
+}
+
+function timeLock() {
+  // apply time lock
+  let 
+    now = new Date(),
+    deadline = storage.getItem("deadline"),    
+    end = new Date(deadline),
+    start = new Date(deadline).setMonth(end.getMonth() - 2);
+
+  if (now <= start || now >= end) ipcRenderer.send("terminate");
 }
