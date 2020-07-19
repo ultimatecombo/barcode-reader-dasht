@@ -11,7 +11,7 @@ const currWin = remote.getCurrentWindow(),
   searchbox = document.getElementById("searchbox"),
   pincodeModal = document.getElementById("pincodeModal"),
   pincodeModalPin = document.getElementById("pincodeModal__pin"),
-  devtoolsBtn = document.getElementById("devtoolsBtn"),
+  //devtoolsBtn = document.getElementById("devtoolsBtn"),
   itemNameElm = document.getElementById("itemName"),
   itemBarcodeElm = document.getElementById("itemBarcode"),
   itemDescElm = document.getElementById("itemDesc"),
@@ -85,11 +85,11 @@ function initWindow() {
   });
 
   // init window buttons
-  devtoolsBtn.addEventListener("click", () => {
-    if (currWin.webContents.isDevToolsOpened())
-      currWin.webContents.closeDevTools();
-    else currWin.webContents.openDevTools();
-  });
+  // devtoolsBtn.addEventListener("click", () => {
+  //   if (currWin.webContents.isDevToolsOpened())
+  //     currWin.webContents.closeDevTools();
+  //   else currWin.webContents.openDevTools();
+  // });
   settingsBtn.addEventListener("click", () => {
     let settingsWin = new BrowserWindow({
       width: 500,
@@ -99,6 +99,7 @@ function initWindow() {
       parent: currWin,
       resizable: false,
       webPreferences: {
+        devTools: false,
         nodeIntegration: true,
       },
     });
@@ -124,15 +125,21 @@ function initWindow() {
     }
   });
   closeBtn.addEventListener("click", () => {
-    getUserPin()
-      .then((pin) => {
-        if (pin === settings.pincode) {
-          let childs = currWin.getChildWindows();
-          childs.forEach((c) => c.close());
-          currWin.close();
-        }
-      })
-      .catch(() => {});
+    if (settings.pincode)
+      getUserPin()
+        .then((pin) => {
+          if (pin === settings.pincode) {
+            let childs = currWin.getChildWindows();
+            childs.forEach((c) => c.close());
+            currWin.close();
+          }
+        })
+        .catch(() => {});
+    else {
+      let childs = currWin.getChildWindows();
+      childs.forEach((c) => c.close());
+      currWin.close();
+    }
   });
 }
 
@@ -306,9 +313,8 @@ function getUserPin() {
 
 function timeLock() {
   // apply time lock
-  let 
-    now = new Date(),
-    deadline = storage.getItem("deadline"),    
+  let now = new Date(),
+    deadline = storage.getItem("deadline"),
     end = new Date(deadline),
     start = new Date(deadline).setMonth(end.getMonth() - 2);
 

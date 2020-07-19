@@ -47,6 +47,7 @@ ipcMain.on("db-get-list", (event, args) => {
 
 ipcMain.on("db-query-item", (event, args) => {
   try {
+    if (!queryPool) return;
     queryPool
       .connect()
       .then((pool) => {
@@ -110,12 +111,12 @@ function createWindow() {
     minHeight: 700,
     frame: false,
     webPreferences: {
+      devTools: false,
       nodeIntegration: true,
     },
   });
 
   mainWindow.loadFile("./views/index.html");
-  mainWindow.webContents.openDevTools();
 }
 
 function handleError(error) {
