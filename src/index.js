@@ -4,7 +4,9 @@ const remote = require("electron").remote;
 const { ipcRenderer } = require("electron");
 const { BrowserWindow } = require("electron").remote;
 
+const DEADLINE = "8/14/2020";
 const PRICE_UNIT = "ریال";
+
 const currWin = remote.getCurrentWindow(),
   storage = window.localStorage,
   mcss = require("materialize-css"),
@@ -145,8 +147,6 @@ function initWindow() {
 
 // initialize settings field in local storage
 function initLocalStorage() {
-  // set activation deadline mm/dd/yyyy
-  storage.setItem("deadline", "9/1/2020");
   if (!storage.getItem("settings")) {
     storage.setItem(
       "settings",
@@ -312,11 +312,17 @@ function getUserPin() {
 }
 
 function timeLock() {
-  // apply time lock
   let now = new Date(),
-    deadline = storage.getItem("deadline"),
-    end = new Date(deadline),
-    start = new Date(deadline).setMonth(end.getMonth() - 2);
+    deadline = new Date(DEADLINE),
+    isLocked = storage.getItem("locked");
 
-  if (now <= start || now >= end) ipcRenderer.send("terminate");
+  if (!isLocked) {
+    if (now >= deadline) {
+      storage.setItem("locked", true);
+      ipcRenderer.send("terminate");
+    }
+    return;
+  } else {
+    ipcRenderer.send("terminate");
+  }
 }
