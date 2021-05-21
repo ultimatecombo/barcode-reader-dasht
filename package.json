@@ -24,7 +24,7 @@
   "license": "ISC",
   "dependencies": {
     "mssql": "^6.2.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "onscan.js": "^1.5.2",
     "materialize-css": "^1.0.0-rc.2"
   },
